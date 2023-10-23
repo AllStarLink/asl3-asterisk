@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+    echo "Usage: add-debian PATH_TO_AS3_ASTERISK"
+    exit 1
+fi
+
+if [ ! -d "$1" ]; then
+    echo "$1: does not exist"
+    exit 1
+fi
+
+if [ ! -f "$1/debian/control" ]; then
+    echo "$1: does not appear to be the asl3-asterisk source"
+    exit 1
+fi
+
+ASL3DEB=$1
+
+if [ ! -f include/asterisk.h ]; then
+    echo "Must run from the root asterisk source directory"
+    exit 1
+fi
+
+if [ -d debian ]; then
+	rm -rf debian/
+fi
+
+cp -r $ASL3DEB/debian .
+

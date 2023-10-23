@@ -33,5 +33,10 @@ fi
 cp -r $APPRPT/apps/app_rpt* $APPRPT/apps/app_gps* apps/
 cp -r $APPRPT/channels/* channels/
 cp $APPRPT/configs/samples/*.sample configs/samples/
+cp $APPRPT/include/asterisk/* include/asterisk/
 cp $APPRPT/res/* res/
+cp $APPRPT/utils/*.c utils/
 
+patch -p1 < $APPRPT/Makefiles.diff
+patch -p1 < $APPRPT/res/Makefile.diff
+patch -p1 < $APPRPT/utils/Makefile.diff

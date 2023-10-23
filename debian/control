@@ -1,4 +1,4 @@
-Source: asl-asterisk
+Source: asl3-asterisk
 Priority: optional
 Section: comm
 Maintainer: Debian VoIP Team <pkg-voip-maintainers@lists.alioth.debian.org>
@@ -80,14 +80,14 @@ Vcs-Git: https://salsa.debian.org/pkg-voip-team/asterisk.git
 Vcs-Browser: https://salsa.debian.org/pkg-voip-team/asterisk
 Rules-Requires-Root: no
 
-Package: asl-asterisk
+Package: asl3-asterisk
 Conflicts: asterisk
 Architecture: any
 Depends:
  adduser,
- asterisk-config (= ${source:Version}) | asterisk-config-custom,
- asterisk-core-sounds-en,
- asterisk-modules (= ${binary:Version}),
+ asl3-asterisk-config (= ${source:Version}) | asterisk-config-custom,
+# asterisk-core-sounds-en,
+ asl3-asterisk-modules (= ${binary:Version}),
  ${misc:Depends},
  ${shlibs:Depends},
 Pre-Depends:
@@ -131,7 +131,7 @@ Description: Open Source Private Branch Exchange (PBX)
  that includes the Asterisk daemon
  and most channel drivers and applications.
 
-Package: asl-asterisk-modules
+Package: asl3-asterisk-modules
 Conflicts: asterisk-modules
 Architecture: any
 Depends:
@@ -154,11 +154,11 @@ Description: loadable modules for the Asterisk PBX
  This package includes most of the Asterisk loadable modules.
  There is normally no need to explicitly install it.
 
-Package: asl-asterisk-dahdi
+Package: asl3-asterisk-dahdi
 Conflicts: asterisk-dahdi
 Architecture: linux-any
 Depends:
- asterisk (= ${binary:Version}),
+ asl3-asterisk (= ${binary:Version}),
  dahdi,
  ${misc:Depends},
  ${shlibs:Depends},
@@ -176,11 +176,11 @@ Description: DAHDI devices support for the Asterisk PBX
  For more information about the Asterisk PBX,
  have a look at the Asterisk package.
 
-Package: asl-asterisk-mysql
+Package: asl3-asterisk-mysql
 Conflicts: asterisk-mysql
 Architecture: any
 Depends:
- asterisk (= ${binary:Version}),
+ asl3-asterisk (= ${binary:Version}),
  ${misc:Depends},
  ${shlibs:Depends},
 Description: MySQL database protocol support for the Asterisk PBX
@@ -193,11 +193,11 @@ Description: MySQL database protocol support for the Asterisk PBX
  For more information about the Asterisk PBX,
  have a look at the Asterisk package.
 
-Package: asl-asterisk-tests
+Package: asl3-asterisk-tests
 Conflicts: asterisk-tests
 Architecture: linux-any
 Depends:
- asterisk (= ${binary:Version}),
+ asl3-asterisk (= ${binary:Version}),
  ${misc:Depends},
  ${shlibs:Depends},
 Description: internal test modules of the Asterisk PBX
@@ -211,7 +211,7 @@ Description: internal test modules of the Asterisk PBX
  For more information about the Asterisk PBX,
  have a look at the Asterisk package.
 
-Package: asl-asterisk-doc
+Package: asl3-asterisk-doc
 Conflicts: asterisk-doc
 Architecture: all
 Multi-Arch: foreign
@@ -226,7 +226,7 @@ Description: Source code documentation for Asterisk
  This package contains the documentation
  for configuring an Asterisk system.
 
-Package: asl-asterisk-dev
+Package: asl3-asterisk-dev
 Conflicts: asterisk-dev
 Architecture: all
 Multi-Arch: foreign
@@ -235,7 +235,7 @@ Depends:
  perl:any,
  ${misc:Depends},
 Recommends:
- asterisk,
+ asl3-asterisk,
 Provides:
  dh-sequence-asterisk,
 Section: devel
@@ -246,16 +246,16 @@ Description: Development files for Asterisk
  used if you wish to compile a package
  which requires Asterisk's source file headers.
 
-Package: asl-asterisk-config
+Package: asl3-asterisk-config
 Depends:
  ${misc:Depends},
 Recommends:
- asterisk,
+ asl3-asterisk,
 Conflicts:
- asterisk-config-custom,
- asterisk-config
+ asl3-asterisk-config-custom,
+ asl3-asterisk-config
 Replaces:
- asterisk-config-custom,
+ asl3-asterisk-config-custom,
 Architecture: all
 Description: Configuration files for Asterisk
  Asterisk is an Open Source PBX and telephony toolkit.

@@ -1,6 +1,9 @@
-#!/bin/bash
+#s!/bin/bash
 
-tar xvfz asterisk_20.5.0.tar.gz
-mv asterisk-20.5.0 asl-asterisk-20.5.0
-cp -r debian asl-asterisk-20.5.0
-tar cvfz asl-asterisk_20.5.0.orig.tar.gz asl-asterisk-20.5.0/
+tar xfz asterisk_20.5.0.tar.gz
+mv asterisk-20.5.0 asl3-asterisk-20.5.0
+(cd asl3-asterisk-20.5.0 && \
+	../asl3-asterisk/add-app_rpt-modules ../app_rpt && \
+	../asl3-asterisk/add-debian ../asl3-asterisk )
+echo 20.5.0+ASL3 > asl3-asterisk-20.5.0/.version
+tar cfz asl3-asterisk_20.5.0.orig.tar.gz asl3-asterisk-20.5.0/
