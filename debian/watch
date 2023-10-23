@@ -1,0 +1,11 @@
+version=4
+# check: uscan --report
+# update: gbp import-orig --uscan
+
+opts=\
+repacksuffix=~asl,\
+pgpmode=auto,\
+uversionmangle=s/\d\K-(rc)/~~$1/,\
+dversionmangle=auto \
+https://downloads.asterisk.org/pub/telephony/asterisk/releases/ \
+asterisk-(20(?:\.\d+)+(?:-rc\d)?)@ARCHIVE_EXT@ group

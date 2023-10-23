@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+	echo "Usage: add-app_rpt-modules PATH_TO_APP_RPT"
+	exit 1
+fi
+
+if [ ! -d "$1" ]; then
+	echo "$1: does not exist"
+	exit 1
+fi
+
+if [ ! -f "$1/apps/app_rpt.c" ]; then
+	echo "$1: does not appear to be the app_rpt source"
+	exit 1
+fi
+
+APPRPT=$1
+
+if [ ! -f include/asterisk.h ]; then
+	echo "Must run from the root asterisk source directory"
+	exit 1
+fi
+
+if [ -d apps/app_rpt ]; then
+	rm -rf apps/app_rpt
+fi
+
+if [ -d channels/xpmr ]; then
+	rm -rf channels/apmr
+fi
+
+cp -r $APPRPT/apps/app_rpt* $APPRPT/apps/app_gps* apps/
+cp -r $APPRPT/channels/* channels/
+cp $APPRPT/configs/samples/*.sample configs/samples/
+cp $APPRPT/res/* res/
+
