@@ -1,0 +1,54 @@
+#!/bin/bash
+
+usage() { echo "Usage: $0 -a ASTERISK_VERSION -r RELEASE -v APP_RPT_VERSION" 1>&2; exit 1; }
+
+while getopts "a:r:v:" o; do
+	case "${o}" in
+		a)
+			AST_VER=${OPTARG}
+			;;
+		r)
+			REL=${OPTARG}
+			;;
+		v)
+			RPT_VER=${OPTARG}
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
+if [ -z "${AST_VER}" ] || [ -z "${RPT_VER}" ] || [ -z "${REL}" ]; then
+	usage
+fi
+
+if [ -z "${EDITOR}" ]; then
+	export EDITOR=vim
+fi
+
+if [ -z "${EMAIL}" ]; then
+	export EMAIL=builder@allstarlink.org
+fi
+
+VSTR="${AST_VER}+asl3-${RPT_VER}"
+EPOCH="2"
+LPATH="asl3-asterisk-${VSTR}"
+
+wget -O asterisk-${AST_VER}.tar.gz https://downloads.asterisk.org/pub/telephony/asterisk/asterisk-20-current.tar.gz
+tar xfz asterisk-${AST_VER}.tar.gz
+mv asterisk-${AST_VER} ${LPATH}
+(cd ${LPATH} && \
+	../asl3-asterisk/add-app_rpt-modules ../app_rpt && \
+	../asl3-asterisk/add-debian ../asl3-asterisk && \
+	echo ${AST_VER}+asl3-${RPT_VER} > .version
+	rm debian/changelog
+	debchange --create --package asl3-asterisk \
+		-v ${EPOCH}:${VSTR}-${REL} -- "see https://github.com/AllStarLink/asl3-asterisk"
+	debchange -r ""
+)
+tar cfz asl3-asterisk_${VSTR}.orig.tar.gz ${LPATH}/
+(cd ${LPATH} && \
+	debuild
+)
