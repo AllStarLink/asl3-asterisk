@@ -1,6 +1,6 @@
-asl3-asterisk (2:20.5.0-1) UNRELEASED; urgency=medium
+asl3-asterisk (2:20.5.0~ASL3_fadead4-1) UNRELEASED; urgency=medium
 
-  * ASL3 Release 
+  * ASL3 Release app_rpt fadead4
 
  -- Jason McCormick <jason@mfamily.org>  Tue, 10 Oct 2023 12:57:09 -0400
 
