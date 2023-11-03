@@ -42,7 +42,8 @@ mv asterisk-${AST_VER} ${LPATH}
 (cd ${LPATH} && \
 	../asl3-asterisk/add-app_rpt-modules ../app_rpt && \
 	../asl3-asterisk/add-debian ../asl3-asterisk && \
-	echo ${AST_VER}+asl3-${RPT_VER} > .version
+	echo ${VSTR} > .version
+	( cd ChangeLogs && ln -s ChangeLog-${AST_VER}.md ChangeLog-${VSTR}.md5 )
 	rm debian/changelog
 	debchange --create --package asl3-asterisk \
 		-v ${EPOCH}:${VSTR}-${REL} -- "see https://github.com/AllStarLink/asl3-asterisk"

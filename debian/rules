@@ -7,10 +7,10 @@ include /usr/share/dpkg/pkg-info.mk
 include /usr/share/dpkg/architecture.mk
 
 # generate documentation unless nodoc requested
-CHANGELOGS_stem = ChangeLogs/ChangeLog-$(firstword $(subst ~, ,$(DEB_VERSION_UPSTREAM)))
+#CHANGELOGS_stem = ChangeLogs/ChangeLog-$(DEB_VERSION_UPSTREAM)
 DOCS_stem = README SECURITY
 ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
-CHANGELOGS = $(CHANGELOGS_stem:=.html) $(CHANGELOGS_stem:=.txt)
+#CHANGELOGS = $(CHANGELOGS_stem:=.html) $(CHANGELOGS_stem:=.txt)
 DOCS = $(DOCS_stem:=.html) $(DOCS_stem:=.txt)
 MANPAGES = debian/build/dh_asterisk.1
 endif
