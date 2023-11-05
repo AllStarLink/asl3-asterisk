@@ -32,7 +32,8 @@ fi
 
 cp -r $APPRPT/apps/app_rpt* $APPRPT/apps/app_gps* apps/
 cp -r $APPRPT/channels/* channels/
-cp $APPRPT/configs/rpt/* configs/
+mkdir configs/asl3
+cp $APPRPT/configs/rpt/* configs/asl3/
 cp $APPRPT/include/asterisk/* include/asterisk/
 cp $APPRPT/res/* res/
 cp $APPRPT/utils/*.c utils/

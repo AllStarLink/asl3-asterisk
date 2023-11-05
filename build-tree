@@ -36,7 +36,14 @@ VSTR="${AST_VER}+asl3-${RPT_VER}"
 EPOCH="2"
 LPATH="asl3-asterisk-${VSTR}"
 
-wget -O asterisk-${AST_VER}.tar.gz https://downloads.asterisk.org/pub/telephony/asterisk/asterisk-20-current.tar.gz
+if [ -d ${LPATH} ]; then
+	rm -rf ${LPATH}
+fi
+
+if [ ! -f asterisk-${AST_VER}.tar.gz ]; then
+	wget -O asterisk-${AST_VER}.tar.gz https://downloads.asterisk.org/pub/telephony/asterisk/asterisk-20-current.tar.gz
+fi
+
 tar xfz asterisk-${AST_VER}.tar.gz
 mv asterisk-${AST_VER} ${LPATH}
 (cd ${LPATH} && \
