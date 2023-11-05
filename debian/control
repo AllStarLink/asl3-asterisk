@@ -90,7 +90,6 @@ Depends:
  asl3-asterisk-modules (= ${binary:Version}),
  ${misc:Depends},
  ${shlibs:Depends},
- libxslt
 Pre-Depends:
  ${misc:Pre-Depends},
 Provides:
