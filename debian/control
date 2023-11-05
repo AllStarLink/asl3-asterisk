@@ -90,6 +90,7 @@ Depends:
  asl3-asterisk-modules (= ${binary:Version}),
  ${misc:Depends},
  ${shlibs:Depends},
+ libxslt
 Pre-Depends:
  ${misc:Pre-Depends},
 Provides:
@@ -98,9 +99,9 @@ Recommends:
  asterisk-moh-opsound-gsm,
  sox,
 Suggests:
- asterisk-dahdi,
- asterisk-dev,
- asterisk-doc,
+ asl3-asterisk-dahdi,
+ asl3-3asterisk-dev,
+ asl3-asterisk-doc,
 Description: Open Source Private Branch Exchange (PBX)
  Asterisk is an Open Source PBX and telephony toolkit.
  It is, in a sense, middleware
@@ -218,7 +219,7 @@ Multi-Arch: foreign
 Depends:
  ${misc:Depends},
 Recommends:
- asterisk,
+ asl-3asterisk,
 Section: doc
 Description: Source code documentation for Asterisk
  Asterisk is an Open Source PBX and telephony toolkit.
