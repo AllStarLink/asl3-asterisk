@@ -65,6 +65,7 @@ Build-Depends:
  libtonezone-dev [linux-any],
  libunbound-dev,
  liburiparser-dev,
+ libusb-dev,
  libvo-amrwbenc-dev,
  libvorbis-dev,
  libxml2-dev,

@@ -61,9 +61,12 @@ apt -y install  autoconf \
  libvorbis-dev \
  libxml2-dev \
  libxslt1-dev \
+ libusb-dev \
  perl \
  portaudio19-dev \
  unixodbc-dev \
  uuid-dev \
- zlib1g-dev 
+ zlib1g-dev \
+ devscripts
+ 
 
