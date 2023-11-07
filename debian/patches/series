@@ -9,3 +9,4 @@
 2006_enable_test_framework.patch
 2008_disable_ilbc.patch
 2010_astdatadir.patch
+config_c_fix_template_inheritance_overrides.patch
