@@ -28,3 +28,9 @@ fi
 
 cp -r $ASL3DEB/debian .
 
+if [ -d sounds ]; then
+    rm -rf sounds/
+fi
+cp -r $ASL3DEB/sounds .
+
+exit 0
