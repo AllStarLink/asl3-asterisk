@@ -28,9 +28,9 @@ fi
 
 cp -r $ASL3DEB/debian .
 
-if [ -d sounds ]; then
-    rm -rf sounds/
+if [ -d rpt-sounds ]; then
+    rm -rf rpt-sounds/
 fi
-cp -r $ASL3DEB/sounds .
+cp -r $ASL3DEB/rpt-sounds .
 
 exit 0

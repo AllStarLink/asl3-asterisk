@@ -152,7 +152,7 @@ execute_after_dh_auto_install:
 	$(RM) -f debian/tmp/usr/sbin/refcounter
 	cp configs/asl3/* debian/tmp/etc/asterisk/
 	mkdir -p debian/tmp/var/lib/asterisk/sounds/en/rpt
-	cp sounds/* debian/tmp/var/lib/asterisk/sounds/en/rpt
+	cp rpt-sounds/* debian/tmp/var/lib/asterisk/sounds/en/rpt
 
 #execute_after_dh_install-arch:
 #	extra_packs=$$(find $(SUBPACKS_EXTRA_DIRS_MOD) -name '*.so' -printf '%f\n');\
