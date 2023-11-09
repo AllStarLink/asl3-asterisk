@@ -27,8 +27,21 @@ if [ -z "${RPT_VER}" ]; then
     usage
 fi
 
-if [ ! -f asl3-asterisk-${RPT_VER}.tar.gz ]; then
-	echo "Download asl3-asterisk-${RPT_VER}.tar.gz to the same directory"
+case `uname -m` in
+	aarch64)
+		ARCH=arm64
+		;;
+	armv7l)
+		ARCH=armhf
+		;;
+	*)
+		ARCH=amd64
+		;;
+esac
+
+TARF=`echo ${RPT_VER} | sed -e 's/~deb12/.deb12/g'`
+if [ ! -f asl3-asterisk-${TARF}-${ARCH}.tar.gz ]; then
+	echo "Download asl3-asterisk-${TARF}-${ARCH}.tar.gz to the same directory"
 	echo "where this file is located."
 	exit 1
 fi
@@ -48,9 +61,9 @@ apt -y install adduser libc6 libcap2 libcrypt1 libedit2 libjansson4 libpopt0 lib
 	debhelper perl \
 	linux-headers-`uname -r`
 
-tar xvfz asl3-asterisk-${RPT_VER}.tar.gz
+tar xvfz asl3-asterisk-${TARF}-${ARCH}.tar.gz
 
-PKG_LIST="asl3-asterisk_${RPT_VER}_amd64.deb asl3-asterisk-config_${RPT_VER}_all.deb asl3-asterisk-dev_${RPT_VER}_all.deb asl3-asterisk-doc_${RPT_VER}_all.deb asl3-asterisk-modules_${RPT_VER}_amd64.deb dahdi-dkms_3.2.0+asl-8_all.deb dahdi-linux_3.2.0+asl-8_all.deb dahdi-source_3.2.0+asl-8_all.deb"
+PKG_LIST="asl3-asterisk_${RPT_VER}_${ARCH}.deb asl3-asterisk-config_${RPT_VER}_all.deb asl3-asterisk-dev_${RPT_VER}_all.deb asl3-asterisk-doc_${RPT_VER}_all.deb asl3-asterisk-modules_${RPT_VER}_${ARCH}.deb dahdi-dkms_3.2.0+asl-8_all.deb dahdi-linux_3.2.0+asl-8_all.deb dahdi-source_3.2.0+asl-8_all.deb"
 
 for d in ${PKG_LIST}
 do
@@ -70,8 +83,6 @@ echo "!!!!"
 
 dpkg -i $PKG_LIST
 rm $PKG_LIST
-
-modprobe dahdi
 
 if ! `lsmod | grep -q dahdi`; then
 	echo "Error: dahdi module not loaded. Were there dpkg errors?"
