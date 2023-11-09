@@ -89,6 +89,9 @@ case "$1" in
 			2>/dev/null
 	done
 
+	# load the modules we care about
+	modprobe -aq dahdi snd-pcm-oss
+
 	set -e
     ;;
 
