@@ -11,10 +11,10 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
 +if [ -n "${SOURCE_DATE_EPOCH}" ]; then
 +	# building reproducibly, faking some data
-+	HOSTNAME='buildd.debian.org'
-+	KERNEL='unknown'
-+	MACHINE='unknown'
-+	USER='nobody'
++	HOSTNAME='allstarlink.org'
++	KERNEL=`uname -r`
++	MACHINE=`uname -m`
++	USER='builder'
 +	DATE=`date -u "+%Y-%m-%d %H:%M:%S" -d @${SOURCE_DATE_EPOCH}`
 +fi
  cat << END
