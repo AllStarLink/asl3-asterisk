@@ -33,4 +33,9 @@ if [ -d rpt-sounds ]; then
 fi
 cp -r $ASL3DEB/rpt-sounds .
 
+if [ -d etc ]; then
+	rm -rf etc/
+fi
+cp -r $ASL3DEB/etc .
+
 exit 0
