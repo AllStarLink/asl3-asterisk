@@ -64,6 +64,7 @@ apt -y install  autoconf \
  libusb-dev \
  perl \
  portaudio19-dev \
+ subversion \
  unixodbc-dev \
  uuid-dev \
  zlib1g-dev \

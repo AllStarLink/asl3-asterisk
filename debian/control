@@ -72,6 +72,7 @@ Build-Depends:
  libxslt1-dev,
  perl <!nodoc>,
  portaudio19-dev,
+ subversion,
  unixodbc-dev,
  uuid-dev,
  zlib1g-dev,
