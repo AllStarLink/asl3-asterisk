@@ -4,7 +4,7 @@
 1008_ffmpeg_include.patch
 1009_build_reproducibly.patch
 #2001_keep_sounds_on_distclean.patch
-2002_no_download_sounds.patch
+#2002_no_download_sounds.patch
 2004_mgcp.patch
 2006_enable_test_framework.patch
 2008_disable_ilbc.patch

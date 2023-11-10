@@ -50,7 +50,7 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	INSTALL_PROGRAM += -s
 endif
 
-ADDONS_ENABLE = app_macro app_voicemail_imap app_voicemail_odbc
+ADDONS_ENABLE = app_macro 
 ADDONS_ENABLE += res_config_mysql
 ADDONS_ENABLE += chan_mobile chan_ooh323 chan_sip
 ADDONS_ENABLE += aelparse format_mp3 smsq TEST_FRAMEWORK
@@ -87,7 +87,7 @@ override_dh_autoreconf:
 execute_before_dh_auto_configure:
 	chmod 755 debian/dummyprogs/fetch
 	rm --force --recursive addons/mp3
-	mkdir addons/mp3
+	contrib/scripts/get_mp3_source.sh
 
 execute_before_dh_auto_build:
 	$(MAKE) menuselect.makeopts BUILD_CFLAGS="$(CFLAGS)" BUILD_LDFLAGS="$(LDFLAGS)"
@@ -109,7 +109,7 @@ execute_after_dh_auto_build: $(DOCS) $(CHANGELOGS) $(MANPAGES)
 	    [ -n "$(EXP_RELEASE)" ] || exit 1; \
 	  fi
 
-SND_FILE=asterisk-core-sounds-en-gsm-1.4.20.tar.gz
+SND_FILE=asterisk-core-sounds-en-gsm-1.6.1.tar.gz
 execute_before_dh_clean:
 	[ ! -r sounds/$(SND_FILE) ] || mv sounds/$($SND_FILE) debian/
 	GREP=grep AWK=awk $(MAKE) distclean
@@ -125,12 +125,12 @@ override_dh_gencontrol:
 
 REMOVED_PROTO_CONFS = dundi mgcp skinny unistim
 REMOVED_PROTO_FILES = $(REMOVED_PROTO_CONFS:%=debian/tmp/etc/asterisk/%.conf)
-#SUBPACKS_EXTRA = Dooh323 mysql mp3
-#ifeq (linux,$(DEB_BUILD_ARCH_OS))
-#SUBPACKS_EXTRA += dahdi mobile tests
-#endif
-#SUBPACKS_EXTRA_DIRS = $(SUBPACKS_EXTRA:%=debian/asterisk-%)
-#SUBPACKS_EXTRA_DIRS_MOD = $(SUBPACKS_EXTRA_DIRS:%=%/usr/lib/$(DEB_HOST_MULTIARCH)/asterisk/modules)
+SUBPACKS_EXTRA = Dooh323 mysql mp3
+ifeq (linux,$(DEB_BUILD_ARCH_OS))
+SUBPACKS_EXTRA += dahdi mobile tests
+endif
+SUBPACKS_EXTRA_DIRS = $(SUBPACKS_EXTRA:%=debian/asterisk-%)
+SUBPACKS_EXTRA_DIRS_MOD = $(SUBPACKS_EXTRA_DIRS:%=%/usr/lib/$(DEB_HOST_MULTIARCH)/asterisk/modules)
 
 override_dh_auto_install:
 	$(FETCH_ENV) dh_auto_install -- $(BUILDFLAGS) -j1 config samples install-headers
@@ -151,15 +151,15 @@ execute_after_dh_auto_install:
 	$(RM) -f debian/tmp/usr/sbin/hashtest*
 	$(RM) -f debian/tmp/usr/sbin/refcounter
 	cp configs/asl3/* debian/tmp/etc/asterisk/
-	mkdir -p debian/tmp/var/lib/asterisk/sounds/en/rpt
-	cp rpt-sounds/* debian/tmp/var/lib/asterisk/sounds/en/rpt
+	mkdir -p debian/tmp/usr/share/asterisk/sounds/en/rpt
+	cp rpt-sounds/* debian/tmp/usr/share/asterisk/sounds/en/rpt
 	install -D -m 644 etc/asl3-oss.conf  debian/tmp/etc/modules-load.d/asl3-oss.conf
 	install -D -m 644 etc/90-asl3.rules debian/tmp/etc/udev/rule.d/90-asl3.rules
 
 #execute_after_dh_install-arch:
 #	extra_packs=$$(find $(SUBPACKS_EXTRA_DIRS_MOD) -name '*.so' -printf '%f\n');\
-#	  cd debian/asterisk-modules/usr/lib/$(DEB_HOST_MULTIARCH)/asterisk/modules \
-#	  && rm -f $$extra_packs
+#	cd debian/asterisk-modules/usr/lib/$(DEB_HOST_MULTIARCH)/asterisk/modules \
+#	&& rm -f $$extra_packs
 
 override_dh_installdocs:
 	dh_installdocs --all -- $(DOCS)

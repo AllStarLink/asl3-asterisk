@@ -8,7 +8,9 @@ usr/share/asterisk/firmware
 usr/share/asterisk/keys
 usr/share/asterisk/phoneprov
 usr/share/asterisk/rest-api
+usr/share/asterisk/moh
+usr/share/asterisk/sounds
 usr/share/dahdi/span_config.d/50-asterisk
-var/lib/asterisk/sounds/en/rpt/*
 etc/udev/rule.d/*.rules
 etc/modules-load.d/*.conf
+var/spool/asterisk/voicemail/*
