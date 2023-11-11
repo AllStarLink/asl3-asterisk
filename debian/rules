@@ -109,12 +109,7 @@ execute_after_dh_auto_build: $(DOCS) $(CHANGELOGS) $(MANPAGES)
 	    [ -n "$(EXP_RELEASE)" ] || exit 1; \
 	  fi
 
-SND_FILE=asterisk-core-sounds-en-gsm-1.6.1.tar.gz
 execute_before_dh_clean:
-	[ ! -r sounds/$(SND_FILE) ] || mv sounds/$($SND_FILE) debian/
-	GREP=grep AWK=awk $(MAKE) distclean
-	[ ! -r debian/$(SND_FILE) ] || mv debian/$(SND_FILE) sounds/
-
 	[ ! -f .version.debian_sav ] || mv .version.debian_sav .version
 	[ ! -f configure.debian_sav ] || mv configure.debian_sav configure
 

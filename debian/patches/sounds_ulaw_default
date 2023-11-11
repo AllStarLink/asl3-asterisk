@@ -1,0 +1,17 @@
+--- a/sounds/sounds.xml.orig	2023-11-11 12:24:34.140000000 -0500
++++ b/sounds/sounds.xml	2023-11-11 12:24:48.992000000 -0500
+@@ -4,13 +4,13 @@
+ 		</member>
+ 		<member name="CORE-SOUNDS-EN-ULAW" displayname="English, mu-Law format">
+ 			<support_level>core</support_level>
++			<defaultenabled>yes</defaultenabled>
+ 		</member>
+ 		<member name="CORE-SOUNDS-EN-ALAW" displayname="English, a-Law format">
+ 			<support_level>core</support_level>
+ 		</member>
+ 		<member name="CORE-SOUNDS-EN-GSM" displayname="English, GSM format" >
+ 			<support_level>core</support_level>
+-			<defaultenabled>yes</defaultenabled>
+ 		</member>
+ 		<member name="CORE-SOUNDS-EN-G729" displayname="English, G.729 format">
+ 			<support_level>core</support_level>
