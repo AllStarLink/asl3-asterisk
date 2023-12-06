@@ -101,7 +101,7 @@ Recommends:
  sox,
 Suggests:
  asl3-asterisk-dahdi,
- asl3-3asterisk-dev,
+ asl3-asterisk-dev,
  asl3-asterisk-doc,
 Description: Open Source Private Branch Exchange (PBX)
  Asterisk is an Open Source PBX and telephony toolkit.
