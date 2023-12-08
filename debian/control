@@ -220,7 +220,7 @@ Multi-Arch: foreign
 Depends:
  ${misc:Depends},
 Recommends:
- asl-3asterisk,
+ asl3-asterisk,
 Section: doc
 Description: Source code documentation for Asterisk
  Asterisk is an Open Source PBX and telephony toolkit.
