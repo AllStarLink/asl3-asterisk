@@ -100,7 +100,6 @@ Recommends:
  asterisk-moh-opsound-gsm,
  sox,
 Suggests:
- asl3-asterisk-dahdi,
  asl3-asterisk-dev,
  asl3-asterisk-doc,
 Description: Open Source Private Branch Exchange (PBX)
@@ -155,45 +154,6 @@ Description: loadable modules for the Asterisk PBX
  .
  This package includes most of the Asterisk loadable modules.
  There is normally no need to explicitly install it.
-
-Package: asl3-asterisk-dahdi
-Conflicts: asterisk-dahdi
-Architecture: linux-any
-Depends:
- asl3-asterisk (= ${binary:Version}),
- dahdi,
- ${misc:Depends},
- ${shlibs:Depends},
-Breaks:
- asterisk-modules (<< 1:11.6.0~dfsg-2),
-Replaces:
- asterisk-modules (<< 1:11.6.0~dfsg-2),
-Description: DAHDI devices support for the Asterisk PBX
- Asterisk is an Open Source PBX and telephony toolkit.
- .
- This package includes the DAHDI channel driver (chan_dahdi.so)
- and a number of other Asterisk modules that require DAHDI support.
- They will not be useful without kernel-level DAHDI support.
- .
- For more information about the Asterisk PBX,
- have a look at the Asterisk package.
-
-Package: asl3-asterisk-mysql
-Conflicts: asterisk-mysql
-Architecture: any
-Depends:
- asl3-asterisk (= ${binary:Version}),
- ${misc:Depends},
- ${shlibs:Depends},
-Description: MySQL database protocol support for the Asterisk PBX
- Asterisk is an Open Source PBX and telephony toolkit.
- .
- This package provides support for using a MySQL database
- to store configuration, call detail records,
- and also provides generic access to it from the dialplan.
- .
- For more information about the Asterisk PBX,
- have a look at the Asterisk package.
 
 Package: asl3-asterisk-tests
 Conflicts: asterisk-tests

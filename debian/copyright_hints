@@ -442,7 +442,6 @@ Files: BSDmakefile
  debian/asterisk-config.lintian-overrides
  debian/asterisk-config.postinst
  debian/asterisk-config.preinst
- debian/asterisk-dahdi.install
  debian/asterisk-dev.install
  debian/asterisk-dev.lintian-overrides
  debian/asterisk-dev.manpages
@@ -450,9 +449,6 @@ Files: BSDmakefile
  debian/asterisk-mobile.install
  debian/asterisk-modules.install
  debian/asterisk-modules.lintian-overrides
- debian/asterisk-mp3.install
- debian/asterisk-mysql.install
- debian/asterisk-ooh323.install
  debian/asterisk-tests.install
  debian/asterisk-tests.lintian-overrides
  debian/asterisk.default
