@@ -41,7 +41,7 @@ if [ -d ${LPATH} ]; then
 fi
 
 if [ ! -f asterisk-${AST_VER}.tar.gz ]; then
-	wget -O asterisk-${AST_VER}.tar.gz https://downloads.asterisk.org/pub/telephony/asterisk/asterisk-20-current.tar.gz
+	wget -O asterisk-${AST_VER}.tar.gz https://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk-${AST_VER}.tar.gz
 fi
 
 tar xfz asterisk-${AST_VER}.tar.gz
