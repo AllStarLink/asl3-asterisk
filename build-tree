@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 usage() { echo "Usage: $0 -a ASTERISK_VERSION -r RELEASE -v APP_RPT_VERSION" 1>&2; exit 1; }
 
 while getopts "a:r:v:" o; do
