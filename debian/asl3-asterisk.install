@@ -11,6 +11,6 @@ usr/share/asterisk/rest-api
 usr/share/asterisk/moh
 usr/share/asterisk/sounds
 usr/share/dahdi/span_config.d/50-asterisk
-etc/udev/rule.d/*.rules
+etc/udev/rules.d/*.rules
 etc/modules-load.d/*.conf
 var/spool/asterisk/voicemail/*
