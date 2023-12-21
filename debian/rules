@@ -149,7 +149,7 @@ execute_after_dh_auto_install:
 	mkdir -p debian/tmp/usr/share/asterisk/sounds/en/rpt
 	cp rpt-sounds/* debian/tmp/usr/share/asterisk/sounds/en/rpt
 	install -D -m 644 etc/asl3-oss.conf  debian/tmp/etc/modules-load.d/asl3-oss.conf
-	install -D -m 644 etc/90-asl3.rules debian/tmp/etc/udev/rule.d/90-asl3.rules
+	install -D -m 644 etc/90-asl3.rules debian/tmp/etc/udev/rules.d/90-asl3.rules
 
 #execute_after_dh_install-arch:
 #	extra_packs=$$(find $(SUBPACKS_EXTRA_DIRS_MOD) -name '*.so' -printf '%f\n');\
