@@ -40,9 +40,9 @@ jobs:
       arch: ${{ inputs.arch == 'armhf' && 'arm64' || inputs.arch == 'amd64' && 'x86_64' || inputs.arch == 'riscv64' && 'x86_64' || inputs.arch }}
       artifact-path: '_debs/*'
     secrets: inherit
-  publish-packages:
-    uses: AllStarLink/asl3-asterisk/.github/workflows/publish_artifacts_to_aptly.yml@develop
-    with:
-      repo-name: asl_builds-${{inputs.os}}${{ inputs.deployment-environment == 'production' && '' || inputs.deployment-environment == 'testing' && '-testing' || inputs.deployment-environment == 'development' && '-devel' || null }}
-    secrets: inherit
-    needs: make-packages
+#  publish-packages:
+#    uses: AllStarLink/asl3-asterisk/.github/workflows/publish_artifacts_to_aptly.yml@develop
+#    with:
+#      repo-name: asl_builds-${{inputs.os}}${{ inputs.deployment-environment == 'production' && '' || inputs.deployment-environment == 'testing' && '-testing' || inputs.deployment-environment == 'development' && '-devel' || null }}
+#    secrets: inherit
+#    needs: make-packages
