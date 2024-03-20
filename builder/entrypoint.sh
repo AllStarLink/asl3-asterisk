@@ -15,22 +15,27 @@ else
 fi
 
 echo "OS_CODENAME: ${OS_CODENAME}"
-cd /build/Allmon3
+
+cd /build
+gh repo clone AllStarLink/app_rpt
+gh repo clone AllStarLink/ASL3
 
 case $OS_CODENAME in
 	bullseye)
-		echo 11 > debian/compat
+		echo 11 > asl3-asterisk/debian/compat
 	;;
 	bookworm)
-		echo 12 > debian/compat
+		echo 12 > asl3-asterisk/debian/compat
 	;;
 	*)
-		echo 13 > debian/compat
+		echo 13 > asl3-asterisk/debian/compat
 	;;
 esac
 
 export EMAIL="AllStarLink <autobuild@allstarlink.org>"
-make docker-deb DPKG_BUILDOPTS="${OPTS}" RELPLAT=$OS_CODENAME
+asl3-asterisk/build-tree -a $
+
+
 [ ! -d _debs ] && mkdir _debs
 rm -f _debs/*
-cp ../*.deb _debs/
+cp *.deb _debs/

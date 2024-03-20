@@ -3,11 +3,17 @@ run-name: Package ${{ github.event.repository.name }}(${{ github.ref_name }}) fo
 on: 
   workflow_dispatch:
     inputs:
+      ast-ver:
+        type: string
+      rpt-ver:
+        type: string
+      asl3-ver:
+        type: string
       arch:
         type: choice
-        options: 
-        - aarch64
+        options:
         - amd64
+        - aarch64
       os:
         type: choice
         options:

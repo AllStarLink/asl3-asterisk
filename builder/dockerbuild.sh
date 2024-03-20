@@ -28,6 +28,15 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+	--ast-ver)
+      AST_VER="$2"
+      ;;
+	--rpt-ver)
+      RPT_VER="$2"
+      ;;
+	--asl3-ver)
+      ASL3_VER="$2"
+	  ;;
     -*|--*|*)
       echo "Unknown option $1"
       exit 1
@@ -42,12 +51,12 @@ fi
 
 if [ -z "$TARGETS" ]
 then
-  TARGETS="Allmon3"
+  TARGETS="asl3-asterisk"
 fi
 
 if [ -z "$OPERATING_SYSTEMS" ]
 then
-  OPERATING_SYSTEMS="buster"
+  OPERATING_SYSTEMS="bookworm"
 fi
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -81,9 +90,12 @@ docker build -f $DIR/Dockerfile -t $D_TAG \
 	--build-arg GROUP_ID=$(id -g) \
 	$DIR
 
-docker run -v $PDIR:/build/Allmon3 \
+docker run -v $PDIR:/build/asl3-asterisk \
 	-e DPKG_BUILDOPTS="$DPKG_BUILDOPTS" \
 	-e BUILD_TARGETS="$TARGETS" \
+    -e AST_VER="$AST_VER" \
+	-e RPT_VER="$RPT_VER" \
+	-e ASL3_VER="$ASL3_VER" \
 	$D_TAG
 
 docker image rm --force $D_TAG
