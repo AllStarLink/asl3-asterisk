@@ -98,4 +98,6 @@ docker run -v $PDIR:/build/asl3-asterisk \
 	-e ASL3_VER="$ASL3_VER" \
 	$D_TAG
 
+gh release upload -R AllStarLink/asl3-asterisk ghr-test /build/_debs/*.deb
+
 docker image rm --force $D_TAG
