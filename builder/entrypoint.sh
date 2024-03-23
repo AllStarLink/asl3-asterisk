@@ -39,3 +39,4 @@ asl3-asterisk/build-tree -a $
 [ ! -d _debs ] && mkdir _debs
 rm -f _debs/*
 cp *.deb _debs/
+gh release upload -R AllStarLink/asl3-asterisk ghr-test _debs/*.deb
