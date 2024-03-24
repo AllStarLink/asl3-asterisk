@@ -17,9 +17,6 @@ fi
 echo "OS_CODENAME: ${OS_CODENAME}"
 
 cd /build
-ping github.com
-gh repo clone AllStarLink/app_rpt
-gh repo clone AllStarLink/ASL3
 
 case $OS_CODENAME in
 	bullseye)
