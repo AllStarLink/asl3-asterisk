@@ -82,7 +82,10 @@ echo "PDIR: ${PDIR}"
 DPKG_BUILDOPTS="-b -uc -us"
 D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
-DEBIAN_FRONTEND=noninteractive apt-get -y install git gh
+
+DEBIAN_FRONTEND=noninteractive apt -y update
+DEBIAN_FRONTEND=noninteractive apt -y upgrade
+DEBIAN_FRONTEND=noninteractive apt-get -y install gh
 
 gh config set git_protocol https
 
