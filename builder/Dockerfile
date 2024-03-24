@@ -13,14 +13,14 @@ RUN addgroup --gid $GROUP_ID user; exit 0
 RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID user; exit 0
 
 # Install build dependencies
-#RUN apt-get update && apt-get -y install \
+RUN apt-get update && apt-get -y install \
 #	apt-utils \
     #build-essential \
     #devscripts \
     #fakeroot \
     #debhelper \
-    #git \
-    #gh \
+    git \
+    gh \
     #ca-certificates \
     #wget \
     #--no-install-recommends
