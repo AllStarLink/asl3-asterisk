@@ -83,9 +83,8 @@ DPKG_BUILDOPTS="-b -uc -us"
 D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
 DEBIAN_FRONTEND=noninteractive apt-get -y install git gh
-( cd $DIR && cd .. && \
-	export GH_DEBUG=api && \
-	gh repo clone AllStarLink/Allmon3 && \
+( cd $DIR && cd ../.. && \
+	gh --version && \
 	gh repo clone AllStarLink/app_rpt && \
 	gh repo clone AllStarLink/ASL3 )
 
