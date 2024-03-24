@@ -86,6 +86,10 @@ DEBIAN_FRONTEND=noninteractive apt-get -y install git gh
 
 gh config set git_protocol https
 
+echo "Debian Version: $(cat /etc/debian_version)"
+echo "Git Version: $(git --version)"
+echo "GH Version: $(gh --version)"
+
 ( cd $PDIR && cd .. && \
 	gh repo clone AllStarLink/app_rpt && \
 	gh repo clone AllStarLink/ASL3 )
