@@ -84,9 +84,9 @@ D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
 DEBIAN_FRONTEND=noninteractive apt-get -y install git gh
 ( cd $DIR && cd ../.. && \
-	gh --version && \
-	gh repo clone AllStarLink/app_rpt && \
-	gh repo clone AllStarLink/ASL3 )
+	gh config set git_protocol https && \
+	gh repo clone https://github.com/AllStarLink/app_rpt && \
+	gh repo clone https://github.com/AllStarLink/ASL3 )
 
 docker build -f $DIR/Dockerfile -t $D_TAG \
 	--build-arg ARCH="$ARCH" \
