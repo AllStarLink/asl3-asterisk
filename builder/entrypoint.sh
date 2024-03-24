@@ -17,6 +17,7 @@ fi
 echo "OS_CODENAME: ${OS_CODENAME}"
 
 cd /build
+echo "GHT: ${GITHUB_TOKEN}"
 gh repo clone AllStarLink/app_rpt
 gh repo clone AllStarLink/ASL3
 
@@ -39,3 +40,4 @@ asl3-asterisk/build-tree -a $
 [ ! -d _debs ] && mkdir _debs
 rm -f _debs/*
 cp *.deb _debs/
+gh release upload -R AllStarLink/asl3-asterisk ghr-test _debs/*.deb
