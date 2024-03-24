@@ -82,6 +82,11 @@ echo "PDIR: ${PDIR}"
 DPKG_BUILDOPTS="-b -uc -us"
 D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
+DEBIAN_FRONTEND=noninteractive apt-get -y install git gh
+( cd $DIR && cd .. && \
+	gh clone AllStarLink/app_rpt && \
+	gh clone AllStarLink/ASL3 )
+
 docker build -f $DIR/Dockerfile -t $D_TAG \
 	--build-arg ARCH="$ARCH" \
 	--build-arg OS="$OPERATING_SYSTEMS" \
@@ -90,10 +95,6 @@ docker build -f $DIR/Dockerfile -t $D_TAG \
 	--build-arg GROUP_ID=$(id -g) \
 	$DIR
 
-DEBIAN_FRONTEND=noninteractive apt-get -y install git gh
-( cd /build && \
-	gh clone AllStarLink/app_rpt && \
-	gh clone AllStarLink/ASL3 )
 
 docker run -v $PDIR:/build/asl3-asterisk \
 	-e DPKG_BUILDOPTS="$DPKG_BUILDOPTS" \
