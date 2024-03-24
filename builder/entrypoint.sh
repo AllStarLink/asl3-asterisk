@@ -17,6 +17,7 @@ fi
 echo "OS_CODENAME: ${OS_CODENAME}"
 
 cd /build
+echo "GHT: ${GITHUB_TOKEN}"
 gh repo clone AllStarLink/app_rpt
 gh repo clone AllStarLink/ASL3
 
