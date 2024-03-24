@@ -83,9 +83,12 @@ DPKG_BUILDOPTS="-b -uc -us"
 D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
 DEBIAN_FRONTEND=noninteractive apt-get -y install git gh
+
+gh auth setup-git
+
 ( cd $PDIR && cd .. && \
-	git clone https://github.com/AllStarLink/app_rpt && \
-	git clone https://github.com/AllStarLink/ASL3 )
+	git clone https://jxmx@github.com/AllStarLink/app_rpt && \
+	git clone https://jxmx@github.com/AllStarLink/ASL3 )
 
 find $PDIR -maxdepth 2
 
