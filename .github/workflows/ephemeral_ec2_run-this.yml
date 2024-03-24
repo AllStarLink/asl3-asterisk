@@ -56,12 +56,18 @@ jobs:
           token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
       - name: Run This
         run: ${{ inputs.run-this }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Archive artifacts
         if: ${{ inputs.artifact-path != '' }}
         uses: actions/upload-artifact@v3
         with:
           name: Archive artifacts
           path: ${{ inputs.artifact-path }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
