@@ -96,6 +96,8 @@ docker run -v $PDIR:/build/asl3-asterisk \
     -e AST_VER="$AST_VER" \
 	-e RPT_VER="$RPT_VER" \
 	-e ASL3_VER="$ASL3_VER" \
+ 	-e GH_TOKEN="$GH_TOKEN" \
+  	-e GITHUB_TOKEN="$GITHUB_TOKEN" \
 	$D_TAG
 
 docker image rm --force $D_TAG
