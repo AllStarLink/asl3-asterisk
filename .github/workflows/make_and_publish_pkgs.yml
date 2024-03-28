@@ -40,7 +40,7 @@ jobs:
   make-packages:
     uses: AllStarLink/asl3-asterisk/.github/workflows/ephemeral_ec2_run-this.yml@develop
     with:
-      run-this: ./builder/dockerbuild.sh -a ${{ inputs.arch  }} -o ${{ inputs.os }} ${{ (inputs.commit-versioning == 'yes' || (inputs.commit-versioning == 'default' && inputs.deployment-environment == 'development')) && '-r' || null }}
+      run-this: ./builder/dockerbuild.sh -a ${{ inputs.arch  }} -o ${{ inputs.os }} --ast-ver ${{ inputs.ast-ver }} --rpt-ver ${{ inputs.rpt-ver }} --asl3-ver ${{ inputs.asl3-ver}} ${{ (inputs.commit-versioning == 'yes' || (inputs.commit-versioning == 'default' && inputs.deployment-environment == 'development')) && '-r' || null }}
       arch: ${{ inputs.arch == 'armhf' && 'arm64' || inputs.arch == 'amd64' && 'x86_64' || inputs.arch == 'riscv64' && 'x86_64' || inputs.arch }}
       artifact-path: '_debs/*'
     secrets: inherit
