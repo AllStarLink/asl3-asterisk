@@ -30,12 +30,18 @@ while [[ $# -gt 0 ]]; do
       ;;
 	--ast-ver)
       AST_VER="$2"
+      shift
+	  shift
       ;;
 	--rpt-ver)
       RPT_VER="$2"
+      shift
+      shift
       ;;
 	--asl3-ver)
       ASL3_VER="$2"
+      shift
+      shift
 	  ;;
     -*|--*|*)
       echo "Unknown option $1"
