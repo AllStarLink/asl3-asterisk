@@ -82,16 +82,10 @@ echo "PDIR: ${PDIR}"
 DPKG_BUILDOPTS="-b -uc -us"
 D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
-
-DEBIAN_FRONTEND=noninteractive apt -y update
-DEBIAN_FRONTEND=noninteractive apt-get -y install gh
-
-export GH_DEBUG=api
-gh config set git_protocol ssh
-
+git config --global url.https://$GITHUB_TOKEN@github.com/.insteadOf https://github.com
 ( cd $PDIR && cd .. && \
-	git -4 clone https://github.com/AllStarLink/app_rpt && \
-	git -4 clone https://github.com/AllStarLink/ASL3 )
+	git clone https://github.com/AllStarLink/app_rpt && \
+	git clone https://github.com/AllStarLink/ASL3 )
 
 find $PDIR -maxdepth 2
 
