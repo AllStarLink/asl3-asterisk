@@ -87,8 +87,8 @@ DPKG_BUILDOPTS="-b -uc -us"
 git config --system url.https://$GITHUB_TOKEN@github.com/.insteadOf https://github.com
 git config --system user.email "builder@allstarlink.org"
 cd $ALL_PKG_ROOT
-git clone https://github.com/AllStarLink/app_rpt && \
-git clone https://github.com/AllStarLink/ASL3 )
+git clone https://github.com/AllStarLink/app_rpt
+git clone https://github.com/AllStarLink/ASL3 
 
 docker build -f $DIR/Dockerfile -t "asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}" \
 	--build-arg ARCH="$ARCH" \
