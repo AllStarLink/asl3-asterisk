@@ -69,6 +69,7 @@ else
   REPO_ENV=""
 fi
 
+## Need to clean this up to be more elegant
 echo "Architectures: $ARCH"
 echo "Targets: $TARGETS"
 echo "Operating Systems: $OPERATING_SYSTEMS"
@@ -78,17 +79,17 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo "DIR: ${DIR}"
 PDIR=$(dirname $DIR)
 echo "PDIR: ${PDIR}"
+ALL_PKG_ROOT=$(dirname ${PDIR}}
+echo "ALL_PKG_ROOT: ${ALL_PKG_ROOT}"
 
 DPKG_BUILDOPTS="-b -uc -us"
 D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
 git config --system url.https://$GITHUB_TOKEN@github.com/.insteadOf https://github.com
 git config --system user.email "builder@allstarlink.org"
-( cd $PDIR && cd .. && \
-	git clone https://github.com/AllStarLink/app_rpt && \
-	git clone https://github.com/AllStarLink/ASL3 )
-
-find $PDIR -maxdepth 2
+cd $ALL_PKG_ROOT
+git clone https://github.com/AllStarLink/app_rpt && \
+git clone https://github.com/AllStarLink/ASL3 )
 
 docker build -f $DIR/Dockerfile -t $D_TAG \
 	--build-arg ARCH="$ARCH" \
@@ -97,18 +98,18 @@ docker build -f $DIR/Dockerfile -t $D_TAG \
 	--build-arg USER_ID=$(id -u) \
 	--build-arg GROUP_ID=$(id -g) \
 	$DIR
-
-
-docker run -v $PDIR:/build/asl3-asterisk \
+ 
+docker run -v $ALL_PKG_ROOT:/build \
 	-e DPKG_BUILDOPTS="$DPKG_BUILDOPTS" \
 	-e BUILD_TARGETS="$TARGETS" \
-    -e AST_VER="$AST_VER" \
+    	-e AST_VER="$AST_VER" \
 	-e RPT_VER="$RPT_VER" \
 	-e ASL3_VER="$ASL3_VER" \
  	-e GH_TOKEN="$GH_TOKEN" \
   	-e GITHUB_TOKEN="$GITHUB_TOKEN" \
 	$D_TAG
 
-gh release upload -R AllStarLink/asl3-asterisk ghr-test /build/_debs/*.deb
+DEBIAN_FRONTEND=noninteractive apt-get -y install gh
+gh release upload -R AllStarLink/asl3-asterisk ghr-test $ALL_PKG_ROOT/_debs/*.deb
 
 docker image rm --force $D_TAG
