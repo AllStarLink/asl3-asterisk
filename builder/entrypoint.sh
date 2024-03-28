@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 #get DPKG_BUILDOPTS from env var or use default
 OPTS=${DPKG_BUILDOPTS:-"-b -uc -us"}
@@ -33,7 +34,5 @@ esac
 export EMAIL="AllStarLink <autobuild@allstarlink.org>"
 asl3-asterisk/build-tree -a $
 
-
-[ ! -d _debs ] && mkdir _debs
-rm -f _debs/*
-cp *.deb _debs/
+mkdir _debs
+mv *.deb _debs/
