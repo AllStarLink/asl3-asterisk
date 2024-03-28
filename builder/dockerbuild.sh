@@ -86,12 +86,6 @@ D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 DEBIAN_FRONTEND=noninteractive apt -y update
 DEBIAN_FRONTEND=noninteractive apt-get -y install gh
 
-gh config set git_protocol https
-
-echo "Debian Version: $(cat /etc/debian_version)"
-echo "Git Version: $(git --version)"
-echo "GH Version: $(gh --version)"
-
 export GH_DEBUG=api
 
 ( cd $PDIR && cd .. && \
