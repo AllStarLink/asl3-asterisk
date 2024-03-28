@@ -90,8 +90,8 @@ export GH_DEBUG=api
 gh config set git_protocol ssh
 
 ( cd $PDIR && cd .. && \
-	gh repo clone AllStarLink/app_rpt && \
-	gh repo clone AllStarLink/ASL3 )
+	git -4 clone https://github.com/AllStarLink/app_rpt && \
+	git -4 clone https://github.com/AllStarLink/ASL3 )
 
 find $PDIR -maxdepth 2
 
