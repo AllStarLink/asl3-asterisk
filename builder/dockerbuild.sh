@@ -90,7 +90,9 @@ cd $ALL_PKG_ROOT
 git clone https://github.com/AllStarLink/app_rpt
 git clone https://github.com/AllStarLink/ASL3 
 
-docker build -f $DIR/Dockerfile -t "asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}" \
+D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
+
+docker build -f $DIR/Dockerfile -t $D_TAG \
 	--build-arg ARCH="$ARCH" \
 	--build-arg OS="$OPERATING_SYSTEMS" \
 	--build-arg ASL_REPO="asl_builds${REPO_ENV}" \
