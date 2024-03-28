@@ -84,7 +84,6 @@ D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
 
 DEBIAN_FRONTEND=noninteractive apt -y update
-DEBIAN_FRONTEND=noninteractive apt -y upgrade
 DEBIAN_FRONTEND=noninteractive apt-get -y install gh
 
 gh config set git_protocol https
@@ -92,6 +91,10 @@ gh config set git_protocol https
 echo "Debian Version: $(cat /etc/debian_version)"
 echo "Git Version: $(git --version)"
 echo "GH Version: $(gh --version)"
+
+echo "Github.com: $(host github.com)"
+echo "Ping:"
+ping github.com
 
 ( cd $PDIR && cd .. && \
 	gh repo clone AllStarLink/app_rpt && \
