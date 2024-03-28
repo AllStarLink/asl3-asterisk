@@ -82,7 +82,8 @@ echo "PDIR: ${PDIR}"
 DPKG_BUILDOPTS="-b -uc -us"
 D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
-git config --global url.https://$GITHUB_TOKEN@github.com/.insteadOf https://github.com
+git config --system url.https://$GITHUB_TOKEN@github.com/.insteadOf https://github.com
+git config --system user.email "builder@allstarlink.org"
 ( cd $PDIR && cd .. && \
 	git clone https://github.com/AllStarLink/app_rpt && \
 	git clone https://github.com/AllStarLink/ASL3 )
