@@ -79,7 +79,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo "DIR: ${DIR}"
 PDIR=$(dirname $DIR)
 echo "PDIR: ${PDIR}"
-ALL_PKG_ROOT=$(dirname ${PDIR}}
+ALL_PKG_ROOT=$(dirname ${PDIR})
 echo "ALL_PKG_ROOT: ${ALL_PKG_ROOT}"
 
 DPKG_BUILDOPTS="-b -uc -us"
@@ -101,7 +101,7 @@ docker build -f $DIR/Dockerfile -t "asl3-asterisk_builder.${OPERATING_SYSTEMS}.$
 docker run -v $ALL_PKG_ROOT:/build \
 	-e DPKG_BUILDOPTS="$DPKG_BUILDOPTS" \
 	-e BUILD_TARGETS="$TARGETS" \
-    	-e AST_VER="$AST_VER" \
+   	-e AST_VER="$AST_VER" \
 	-e RPT_VER="$RPT_VER" \
 	-e ASL3_VER="$ASL3_VER" \
  	-e GH_TOKEN="$GH_TOKEN" \
