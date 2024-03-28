@@ -87,6 +87,7 @@ DEBIAN_FRONTEND=noninteractive apt -y update
 DEBIAN_FRONTEND=noninteractive apt-get -y install gh
 
 export GH_DEBUG=api
+gh config set git_protocol ssh
 
 ( cd $PDIR && cd .. && \
 	gh repo clone AllStarLink/app_rpt && \
