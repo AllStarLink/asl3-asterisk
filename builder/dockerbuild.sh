@@ -92,9 +92,7 @@ echo "Debian Version: $(cat /etc/debian_version)"
 echo "Git Version: $(git --version)"
 echo "GH Version: $(gh --version)"
 
-echo "Github.com: $(host github.com)"
-echo "Ping:"
-ping github.com
+export GH_DEBUG=api
 
 ( cd $PDIR && cd .. && \
 	gh repo clone AllStarLink/app_rpt && \
