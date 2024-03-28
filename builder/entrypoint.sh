@@ -32,7 +32,7 @@ case $OS_CODENAME in
 esac
 
 export EMAIL="AllStarLink <autobuild@allstarlink.org>"
-asl3-asterisk/build-tree -a $
+asl3-asterisk/build-tree -a $AST_VER -r $ASL3_VER -v $RPT_VER
 
 mkdir _debs
 mv *.deb _debs/
