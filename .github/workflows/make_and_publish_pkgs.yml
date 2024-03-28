@@ -5,10 +5,14 @@ on:
     inputs:
       ast-ver:
         type: string
+        default: '20.7.0'
+        required: true
       rpt-ver:
         type: string
+        required: true
       asl3-ver:
         type: string
+        required: true
       arch:
         type: choice
         options:
