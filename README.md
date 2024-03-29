@@ -11,6 +11,37 @@ https://salsa.debian.org/pkg-voip-team/asterisk.
 This repository is structure to track the Asterisk 20 LTS
 release from the Asterisk project.
 
+In general, this repo is used exclsively for the AllStarLink
+project to build the asterisk-related packages via
+GitHub and is not for general consumption. Feel free to
+fork and use as desired but this project will generally not
+provide any user support.
+
+## Package version format
+All packages created by this repo have the following version
+format based on `deb-version(7)` manpage explanation.
+
+```
+ ${EPOCH}:${ASTERISK_VERSION}+asl3-${RPT_VER}-${PKG_RELEASE}
+
+|----+---|--------+--------------------------X-----+--------X
+     |            |                                |
+     |            +-- "upstream-version"           |
+     |                                             |
+     +-- "epoch"               "debian-revision" --+
+```
+
+The values are defined as follows:
+
+* `EPOCH` - By Debian Asterisk convention this is hardcoded as "2"
+
+* `ASTERISK_VERSION` - The Asterisk LTS version upon which the version is based - e.g. 20.7.0
+
+* `RPT_VER` - The version of the "app\_rpt" repo released for this build - e.g. 3.0
+
+* `PKG_RELEASE` - The ASL3 project release version of the package build. Usually 1 unless there
+was a problem specifically with package building that caused a new .deb publication needed.
+
 ## Building the .deb Files
 The following is the loose process for building the
 `.deb` files for installation.
@@ -24,7 +55,7 @@ Change into that directory.
 git clone git@github.com:AllStarLink/asl3-asterisk.git
 ```
 
-3. Pull the app_rpt repository into the directory:
+3. Pull the app\_rpt repository into the directory:
 ```
 git clone git@github.com:InterLinked1/app_rpt.git
 ```
