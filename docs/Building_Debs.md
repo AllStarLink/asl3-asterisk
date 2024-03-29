@@ -87,7 +87,7 @@ ASTERISK_VERSION_asl3-RPT_VERSION-RELEASE_VER
 For the above example of Asterisk 20.7.0, app\_rpt 1.1, and 
 release 2. the relase tag and name would be:
 ```
-20.7.0_asl3-1.1-1
+20.7.0_asl3-1.1-2
 ```
 Note: GitHub acts oddly about + signs in the tags and release
 names so it's convered to an underscore.
