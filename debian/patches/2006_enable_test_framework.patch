@@ -20,3 +20,14 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 -			<support_level>extended</support_level>
 -		</member>
  	</category>
+--- a/build_tools/cflags.xml
++++ b/build_tools/cflags.xml
+@@ -128,4 +128,8 @@
+ 			<defaultenabled>yes</defaultenabled>
+ 			<depend>native_arch</depend>
+ 		</member>
++		<member name="TEST_FRAMEWORK" displayname="Enable Test Framework API">
++			<defaultenabled>yes</defaultenabled>
++			<support_level>extended</support_level>
++		</member>
+ 	</category>
