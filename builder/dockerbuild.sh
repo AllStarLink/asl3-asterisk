@@ -43,6 +43,11 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
 	  ;;
+	--gh-rel)
+	  GH_REL="$2"
+	  shift
+	  shift
+	  ;;
     -*|--*|*)
       echo "Unknown option $1"
       exit 1
@@ -117,6 +122,6 @@ docker run -v $ALL_PKG_ROOT:/build \
 	$D_TAG
 
 DEBIAN_FRONTEND=noninteractive apt-get -y install gh
-gh release upload -R AllStarLink/asl3-asterisk ghr-test $ALL_PKG_ROOT/_debs/*.deb
+gh release upload -R AllStarLink/asl3-asterisk $GH_REL $ALL_PKG_ROOT/_debs/*.deb
 
 docker image rm --force $D_TAG
