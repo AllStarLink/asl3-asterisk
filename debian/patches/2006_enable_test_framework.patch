@@ -1,18 +1,7 @@
-Description: Enable the test framework
- Test modules are normally only enabled in development mode.
- This patch enables them without the need to enable dev-mode.
- .
- The modules provide simple tests. Try: asterisk -rx 'test execute all'
- .
- Those modules should not be confused with the tests in the asterisk-testsute package.
-Author: Tzafrir Cohen <tzafrir@debian.org>
-Forwarded: not-needed
-Last-Update: 2023-08-27
----
-This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
---- a/build_tools/cflags-devmode.xml
-+++ b/build_tools/cflags-devmode.xml
-@@ -21,7 +21,4 @@
+diff -ur a/build_tools/cflags-devmode.xml b/build_tools/cflags-devmode.xml
+--- a/build_tools/cflags-devmode.xml	2024-03-18 09:21:48.000000000 -0400
++++ b/build_tools/cflags-devmode.xml	2024-03-29 09:00:12.112673898 -0400
+@@ -20,7 +20,4 @@
  		<member name="THREAD_CRASH" displayname="Crash on mutex errors">
  			<support_level>extended</support_level>
  		</member>
@@ -20,14 +9,17 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 -			<support_level>extended</support_level>
 -		</member>
  	</category>
---- a/build_tools/cflags.xml
-+++ b/build_tools/cflags.xml
-@@ -128,4 +128,8 @@
- 			<defaultenabled>yes</defaultenabled>
- 			<depend>native_arch</depend>
+Only in b/build_tools: cflags-devmode.xml.orig
+diff -ur a/build_tools/cflags.xml b/build_tools/cflags.xml
+--- a/build_tools/cflags.xml	2024-03-18 09:21:48.000000000 -0400
++++ b/build_tools/cflags.xml	2024-03-29 09:00:12.112673898 -0400
+@@ -132,4 +132,8 @@
+ 			<support_level>core</support_level>
+ 			<defaultenabled>no</defaultenabled>
  		</member>
 +		<member name="TEST_FRAMEWORK" displayname="Enable Test Framework API">
 +			<defaultenabled>yes</defaultenabled>
 +			<support_level>extended</support_level>
 +		</member>
  	</category>
+Only in b/build_tools: cflags.xml.orig
