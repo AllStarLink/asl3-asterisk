@@ -2,6 +2,7 @@
 
 set -e
 
+## Set the variables for things
 usage() { echo "Usage: $0 -a ASTERISK_VERSION -r RELEASE -v APP_RPT_VERSION" 1>&2; exit 1; }
 
 while getopts "a:r:v:" o; do
@@ -38,6 +39,8 @@ VSTR="${AST_VER}+asl3-${RPT_VER}"
 EPOCH="2"
 LPATH="asl3-asterisk-${VSTR}"
 
+
+## Clean up and Prep the Build Environment
 if [ -d ${LPATH} ]; then
 	rm -rf ${LPATH}
 fi
@@ -45,20 +48,20 @@ fi
 if [ ! -f asterisk-${AST_VER}.tar.gz ]; then
 	wget -O asterisk-${AST_VER}.tar.gz https://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk-${AST_VER}.tar.gz
 fi
-
 tar xfz asterisk-${AST_VER}.tar.gz
 mv asterisk-${AST_VER} ${LPATH}
-(cd ${LPATH} && \
-	../asl3-asterisk/add-app_rpt-modules ../app_rpt && \
-	../asl3-asterisk/add-debian ../asl3-asterisk && \
-	echo ${VSTR} > .version
-	( cd ChangeLogs && ln -s ChangeLog-${AST_VER}.md ChangeLog-${VSTR}.md5 )
-	rm debian/changelog
-	debchange --create --package asl3-asterisk \
-		-v ${EPOCH}:${VSTR}-${REL} -- "see https://github.com/AllStarLink/app_rpt"
-	debchange -r ""
-)
+pushd ${LPATH}
+../asl3-asterisk/add-app_rpt-modules ../app_rpt 
+../asl3-asterisk/add-debian ../asl3-asterisk
+echo ${VSTR} > .version
+( cd ChangeLogs && ln -s ChangeLog-${AST_VER}.md ChangeLog-${VSTR}.md5 )
+rm debian/changelog
+debchange --create --package asl3-asterisk \
+	-v ${EPOCH}:${VSTR}-${REL} -- "see https://github.com/AllStarLink/app_rpt"
+debchange -r ""
+popd
 tar cfz asl3-asterisk_${VSTR}.orig.tar.gz ${LPATH}/
-(cd ${LPATH} && \
-	debuild
-)
+
+## Do the building
+pushd ${LPATH}
+dpkg-buildpackage -b --no-sign -j$(nproc --all)
