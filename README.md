@@ -21,7 +21,7 @@ provide any user support.
 All packages created by this repo have the following version
 format based on `deb-version(7)` manpage explanation.
 
-```
+<pre>
  ${EPOCH}:${ASTERISK_VERSION}+asl3-${RPT_VER}-${PKG_RELEASE}
 
 |----+---|--------+--------------------------X-----+--------X
@@ -29,7 +29,7 @@ format based on `deb-version(7)` manpage explanation.
      |            +-- "upstream-version"           |
      |                                             |
      +-- "epoch"               "debian-revision" --+
-```
+</pre>
 
 The values are defined as follows:
 
@@ -55,9 +55,9 @@ or whatever you want to call the very root of the build process.
 Change into that directory.
 
 2. Pull the asl3-asterisk repository into the directory:
-```
+<pre>
 git clone git@github.com:AllStarLink/asl3-asterisk.git
-```
+</pre>
 
 3. Pull the app\_rpt repository into the directory:
 ```
