@@ -42,6 +42,10 @@ The values are defined as follows:
 * `PKG_RELEASE` - The ASL3 project release version of the package build. Usually 1 unless there
 was a problem specifically with package building that caused a new .deb publication needed.
 
+A file generated from this repo using the versioning format above will be named,
+for example `asl3-asterisk-20.7.0+asl3-1.0-1`. Note that the *epoch* does not appear
+in the filename by debian convention.
+
 ## Building the .deb Files
 The following is the loose process for building the
 `.deb` files for installation.
