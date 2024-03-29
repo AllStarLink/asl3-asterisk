@@ -4,32 +4,39 @@ on:
   workflow_dispatch:
     inputs:
       ast-ver:
+        description: 'Asterisk LTS Version Base'
         type: string
         default: '20.7.0'
         required: true
       rpt-ver:
+        description: 'app_rpt Version Tag'
         type: string
         required: true
       asl3-ver:
+        description: 'Package Revision (usually 1)'
         type: string
         required: true
       arch:
+        description: 'Platform Architecture'
         type: choice
         options:
         - amd64
         - aarch64
       os:
+        description: 'Debian Release Version'
         type: choice
         options:
           - bookworm
           - bullseye
       deployment-environment:
+        description: 'Aptly Repository Stream'
         type: choice
         options:
         - development
         - testing
         - production
       commit-versioning:
+        description: 'Commit Versioning'
         type: choice
         options:
           - default
