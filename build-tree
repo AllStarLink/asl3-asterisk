@@ -55,7 +55,7 @@ mv asterisk-${AST_VER} ${LPATH}
 	( cd ChangeLogs && ln -s ChangeLog-${AST_VER}.md ChangeLog-${VSTR}.md5 )
 	rm debian/changelog
 	debchange --create --package asl3-asterisk \
-		-v ${EPOCH}:${VSTR}-${REL} -- "see https://github.com/AllStarLink/asl3-asterisk"
+		-v ${EPOCH}:${VSTR}-${REL} -- "see https://github.com/AllStarLink/app_rpt"
 	debchange -r ""
 )
 tar cfz asl3-asterisk_${VSTR}.orig.tar.gz ${LPATH}/
