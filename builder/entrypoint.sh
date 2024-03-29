@@ -19,18 +19,6 @@ echo "OS_CODENAME: ${OS_CODENAME}"
 
 cd /build
 
-case $OS_CODENAME in
-	bullseye)
-		echo 11 > asl3-asterisk/debian/compat
-	;;
-	bookworm)
-		echo 12 > asl3-asterisk/debian/compat
-	;;
-	*)
-		echo 13 > asl3-asterisk/debian/compat
-	;;
-esac
-
 export EMAIL="AllStarLink <autobuild@allstarlink.org>"
 asl3-asterisk/build-tree -a $AST_VER -r $ASL3_VER -v $RPT_VER
 
