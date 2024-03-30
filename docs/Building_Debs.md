@@ -111,7 +111,7 @@ click on **Run workflow**
 
     * *Package Revision* - This is the Release Version determined above
 
-    * *Platform Architcture* - Choose `amd64` or `aarch64` as appropriate
+    * *Platform Architcture* - Choose `amd64` or `arm64` as appropriate
 
     * *Debian Release Version* - Choose the Debian release version to build. Note that
       currently the releases in GitHub do not support multiple Debian releases in the
