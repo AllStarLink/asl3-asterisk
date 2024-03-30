@@ -10,7 +10,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -a|--architecture)
-      ARCH="$2"
+      ARCH_ASK="$2"
       shift
       shift
       ;;
@@ -55,10 +55,22 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ -z "$ARCH" ]
+if [ -z "$ARCH_ASK" ]
 then
   ARCH="all"
 fi
+
+case $ARCH_ASK in
+	arm64)
+		ARCH=arm64v8
+		;;
+	armhf)
+		ARCH=arm32v7
+		;;
+	*)
+		ARCH=$ARCH_ASK
+		;;
+esac
 
 if [ -z "$TARGETS" ]
 then
