@@ -16,12 +16,12 @@ on:
         description: 'Package Revision (usually 1)'
         type: string
         required: true
-      parch:
+      arch:
         description: 'Platform Architecture'
         type: choice
         options:
         - amd64
-        - aarch64
+        - arm64
       os:
         description: 'Debian Release Version'
         type: choice
@@ -51,7 +51,7 @@ jobs:
     uses: AllStarLink/asl3-asterisk/.github/workflows/ephemeral_ec2_run-this.yml@develop
     with:
       run-this: ./builder/dockerbuild.sh -a ${{ inputs.arch  }} -o ${{ inputs.os }} --ast-ver ${{ inputs.ast-ver }} --rpt-ver ${{ inputs.rpt-ver }} --asl3-ver ${{ inputs.asl3-ver}} --gh-rel ${{ inputs.gh-rel }} ${{ (inputs.commit-versioning == 'yes' || (inputs.commit-versioning == 'default' && inputs.deployment-environment == 'development')) && '-r' || null }}
-      arch: ${{ inputs.parch == 'armhf' && 'arm64' || inputs.parch == 'aarch64' && 'arm64' || inputs.parch == 'amd64' && 'x86_64' || inputs.parch == 'riscv64' && 'x86_64' || inputs.parch }}
+      arch: ${{ inputs.arch == 'armhf' && 'arm64' || inputs.arch == 'aarch64' && 'arm64' || inputs.arch == 'amd64' && 'x86_64' || inputs.arch == 'riscv64' && 'x86_64' || inputs.arch }}
       artifact-path: '_debs/*'
     secrets: inherit
 #  publish-packages:

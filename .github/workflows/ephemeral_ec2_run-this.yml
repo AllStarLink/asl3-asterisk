@@ -21,10 +21,6 @@ jobs:
       label: ${{ steps.start-ec2-runner.outputs.label }}
       ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
     steps:
-      - name: Show arch
-        run: echo "arch: ${{ inputs.arch }}"
-      - name: Show parch
-        run: echo "parch: ${{ inputs.parch }}"
       - name: Configure AWS credentials
         uses: AllStarLink/configure-aws-credentials@v1
         with:
