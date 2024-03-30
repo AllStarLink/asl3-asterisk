@@ -35,6 +35,8 @@ if [ -z "${EMAIL}" ]; then
 	export EMAIL=builder@allstarlink.org
 fi
 
+FULL_REL="${REL}.deb$(lsb_release -rs 2> /dev/null)"
+
 VSTR="${AST_VER}+asl3-${RPT_VER}"
 EPOCH="2"
 LPATH="asl3-asterisk-${VSTR}"
@@ -57,7 +59,7 @@ echo ${VSTR} > .version
 ( cd ChangeLogs && ln -s ChangeLog-${AST_VER}.md ChangeLog-${VSTR}.md5 )
 rm debian/changelog
 debchange --create --package asl3-asterisk \
-	-v ${EPOCH}:${VSTR}-${REL} -- "see https://github.com/AllStarLink/app_rpt"
+	-v ${EPOCH}:${VSTR}-${FULL_REL} -- "see https://github.com/AllStarLink/app_rpt"
 debchange -r ""
 popd
 tar cfz asl3-asterisk_${VSTR}.orig.tar.gz ${LPATH}/

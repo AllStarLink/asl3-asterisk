@@ -68,6 +68,7 @@ apt -y install  autoconf \
  unixodbc-dev \
  uuid-dev \
  zlib1g-dev \
- devscripts
+ devscripts \
+ lsb-release
  
 

@@ -76,6 +76,7 @@ Build-Depends:
  unixodbc-dev,
  uuid-dev,
  zlib1g-dev,
+ lsb-release
 Standards-Version: 4.6.2
 Homepage: https://www.allstarlink.org/
 Vcs-Git: https://salsa.debian.org/pkg-voip-team/asterisk.git
