@@ -1,3 +1,4 @@
+etc/logrotate.d/*
 lib/systemd/system/asterisk.service
 usr/bin/asterisk-config-custom
 usr/lib/${DEB_HOST_MULTIARCH}/libasterisk*
@@ -13,4 +14,5 @@ usr/share/asterisk/sounds
 usr/share/dahdi/span_config.d/50-asterisk
 etc/udev/rules.d/*.rules
 etc/modules-load.d/*.conf
+var/lib/asterisk/scripts/*
 var/spool/asterisk/voicemail/*
