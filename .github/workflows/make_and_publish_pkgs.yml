@@ -1,4 +1,4 @@
-name: make_and_publish_pkgs
+name: "Make and Publish Pkgs"
 run-name: Package ${{ github.event.repository.name }}(${{ github.ref_name }}) for ${{ inputs.os }}/${{ inputs.arch }}, Publish to ${{ inputs.deployment-environment }}
 on: 
   workflow_dispatch:
@@ -38,13 +38,6 @@ on:
         - development
         - testing
         - production
-      commit-versioning:
-        description: 'Commit Versioning'
-        type: choice
-        options:
-          - default
-          - yes
-          - no
 
 jobs:
   make-packages:
@@ -52,11 +45,11 @@ jobs:
     with:
       run-this: ./builder/dockerbuild.sh -a ${{ inputs.arch  }} -o ${{ inputs.os }} --ast-ver ${{ inputs.ast-ver }} --rpt-ver ${{ inputs.rpt-ver }} --asl3-ver ${{ inputs.asl3-ver}} --gh-rel ${{ inputs.gh-rel }} ${{ (inputs.commit-versioning == 'yes' || (inputs.commit-versioning == 'default' && inputs.deployment-environment == 'development')) && '-r' || null }}
       arch: ${{ inputs.arch == 'armhf' && 'arm64' || inputs.arch == 'aarch64' && 'arm64' || inputs.arch == 'amd64' && 'x86_64' || inputs.arch == 'riscv64' && 'x86_64' || inputs.arch }}
-      artifact-path: '_debs/*'
+      artifact-path: '/actions-runner/_work/asl3-asterisk/_debs/'
     secrets: inherit
-#  publish-packages:
-#    uses: AllStarLink/asl3-asterisk/.github/workflows/publish_artifacts_to_aptly.yml@develop
-#    with:
-#      repo-name: asl_builds-${{inputs.os}}${{ inputs.deployment-environment == 'production' && '' || inputs.deployment-environment == 'testing' && '-testing' || inputs.deployment-environment == 'development' && '-devel' || null }}
-#    secrets: inherit
-#    needs: make-packages
+  publish-packages:
+    uses: AllStarLink/asl3-asterisk/.github/workflows/publish_artifacts_to_aptly.yml@develop
+    with:
+      repo-name: asl3-${{ inputs.aptly-repo }}
+    secrets: inherit
+    needs: make-packages
