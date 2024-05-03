@@ -31,12 +31,12 @@ on:
       gh-rel:
         description: 'GitHub Release Tag (for debs)'
         type: string
-      deployment-environment:
+      aptly-repo:
         description: 'Aptly Repository Stream'
         type: choice
         options:
-        - devel
-        - beta
+          - devel
+          - beta
 
 jobs:
   make-packages:
