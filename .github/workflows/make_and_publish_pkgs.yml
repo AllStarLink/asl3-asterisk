@@ -35,9 +35,8 @@ on:
         description: 'Aptly Repository Stream'
         type: choice
         options:
-        - development
-        - testing
-        - production
+        - devel
+        - beta
 
 jobs:
   make-packages:
