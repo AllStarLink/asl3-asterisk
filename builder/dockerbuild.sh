@@ -133,14 +133,14 @@ docker run -v $ALL_PKG_ROOT:/build \
   	-e GITHUB_TOKEN="$GITHUB_TOKEN" \
 	$D_TAG
 
-DEBIAN_FRONTEND=noninteractive apt-get -y install gh
-gh release upload -R AllStarLink/asl3-asterisk $GH_REL $ALL_PKG_ROOT/_debs/*.deb
-
 # For anything not the amd64 build, delete the
 # "all" packages so they don't conflict in Aptly
 # if the Aptly task is run after this
 if [ "$(uname -m)" != "x86_64" ]; then
 	rm $ALL_PKG_ROOT/_debs/*_all.deb
 fi
+
+DEBIAN_FRONTEND=noninteractive apt-get -y install gh
+gh release upload -R AllStarLink/asl3-asterisk $GH_REL $ALL_PKG_ROOT/_debs/*.deb
 
 docker image rm --force $D_TAG
