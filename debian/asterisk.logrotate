@@ -5,7 +5,8 @@
 	compress
 	delaycompress
 	notifempty
-	create 640 root root
+	create 640 asterisk asterisk
+	su asterisk asterisk
 	sharedscripts
 	postrotate
 		/usr/sbin/asterisk -rx 'logger reload' > /dev/null 2> /dev/null
