@@ -20,7 +20,7 @@ echo "OS_CODENAME: ${OS_CODENAME}"
 cd /build
 
 export EMAIL="AllStarLink <autobuild@allstarlink.org>"
-asl3-asterisk/build-tree -a $AST_VER -r $ASL3_VER -v $RPT_VER
+asl3-asterisk/build-tree -a $AST_VER -r $PACKAGE_VER -v $RPT_VER
 
 mkdir _debs
 mv *.deb _debs/

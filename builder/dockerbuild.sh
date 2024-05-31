@@ -38,8 +38,8 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
-	--asl3-ver)
-      ASL3_VER="$2"
+	--package-ver)
+      PACKAGE_VER="$2"
       shift
       shift
 	  ;;
@@ -109,9 +109,9 @@ DPKG_BUILDOPTS="-b -uc -us"
 
 git config --system url.https://$GITHUB_TOKEN@github.com/.insteadOf https://github.com
 git config --system user.email "builder@allstarlink.org"
+
 cd $ALL_PKG_ROOT
 git clone https://github.com/AllStarLink/app_rpt
-git clone https://github.com/AllStarLink/ASL3 
 
 D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
@@ -128,7 +128,7 @@ docker run -v $ALL_PKG_ROOT:/build \
 	-e BUILD_TARGETS="$TARGETS" \
    	-e AST_VER="$AST_VER" \
 	-e RPT_VER="$RPT_VER" \
-	-e ASL3_VER="$ASL3_VER" \
+	-e PACKAGE_VER="$PACKAGE_VER" \
  	-e GH_TOKEN="$GH_TOKEN" \
   	-e GITHUB_TOKEN="$GITHUB_TOKEN" \
 	$D_TAG
