@@ -4,6 +4,10 @@ Asterisk LTS + ASL3/app\_rpt. This repository is only
 for the build scripts and the Quilt-compatible `debian/`
 structure for package building.
 
+### DO NOT FILE ALLSTARLINK BUGS AGAINST THIS PROJECT. THIS IS ONLY FOR THE BUILDER PROCESS.
+
+### BUGS GO TO [ASL3](https://github.com/AllStarLink/ASL3/issues)
+
 This structure is forked from the Debian project's
 Asterisk build environment located at
 https://salsa.debian.org/pkg-voip-team/asterisk.
