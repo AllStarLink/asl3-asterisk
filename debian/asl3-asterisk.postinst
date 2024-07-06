@@ -92,6 +92,11 @@ case "$1" in
 	# load the modules we care about
 	modprobe -aq dahdi snd-pcm-oss
 
+	# remove customized /etc/systemd/system/asterisk.service
+	test -f /etc/systemd/system/asterisk.service && \
+		mv /etc/systemd/system/asterisk.service /etc/systemd/system/asterisk.service-obsolete
+	systemctl daemon-reload
+
 	set -e
     ;;
 
