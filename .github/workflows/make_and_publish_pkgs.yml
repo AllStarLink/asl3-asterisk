@@ -6,15 +6,17 @@ on:
       ast-ver:
         description: 'Asterisk LTS Version Base'
         type: string
-        default: '20.7.0'
+        default: '20.8.1'
         required: true
       rpt-ver:
         description: 'app_rpt Version Tag'
         type: string
+        default: '3.0.'
         required: true
       package-ver:
         description: 'Package Revision (usually 1)'
         type: string
+        default: '1'
         required: true
       arch:
         description: 'Platform Architecture'
