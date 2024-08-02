@@ -104,6 +104,7 @@ PDIR=$(dirname $DIR)
 echo "PDIR: ${PDIR}"
 ALL_PKG_ROOT=$(dirname ${PDIR})
 echo "ALL_PKG_ROOT: ${ALL_PKG_ROOT}"
+echo "GH_REL: ${GH_REL}"
 
 DPKG_BUILDOPTS="-b -uc -us"
 
@@ -144,3 +145,16 @@ DEBIAN_FRONTEND=noninteractive apt-get -y install gh
 gh release upload -R AllStarLink/asl3-asterisk $GH_REL $ALL_PKG_ROOT/_debs/*.deb
 
 docker image rm --force $D_TAG
+
+find $ALL_PKG_ROOT/_debs/*.deb -name "*.deb" | \
+    xargs -I {} -d '\n' curl --fail --user ${APTLY_USER} \
+    -X POST -F 'file=@"{}"' \
+     https://repo-admin.allstarlink.org/api/files/${APTLY_REPO}-${OPERATING_SYSTEMS}
+
+curl --fail --user ${APTLY_USER} -X POST \
+    https://repo-admin.allstarlink.org/api/repos/${APTLY_REPO}/file/${APTLY_REPO}-${OPERATING_SYSTEMS}
+
+curl --fail --user ${APTLY_USER} -X PUT -H "content-Type: application/json" \
+    --data "{\"Signing\": {\"Batch\": true, \"Passphrase\": \"${APTLY_GPG_PASSPHRASE}\"}}" \
+    "https://repo-admin.allstarlink.org/api/publish/:./${OPERATING_SYSTEMS}"
+
