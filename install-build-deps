@@ -7,7 +7,9 @@ apt -y install  autoconf \
  cmark-gfm \
  dahdi-source \
  debhelper-compat \
+ debuild \
  default-libmysqlclient-dev \
+ dpkg-dev \
  freetds-dev \
  libasound2-dev \
  libavcodec-dev \
@@ -55,6 +57,7 @@ apt -y install  autoconf \
  libswscale-dev \
  libsystemd-dev \
  libtonezone-dev\
+ libtonezone2.0 \
  libunbound-dev \
  liburiparser-dev \
  libvo-amrwbenc-dev \
