@@ -5,7 +5,7 @@ set -e
 usage()
 {
     cat <<_EOT_ 1>&2
-Usage : $0 -a ASTV -v RPTV [-r RELV] [-d DESTDIR] [-l] ACTIONS 
+Usage : $0 -a ASTV -v RPTV -r RELV [-d DESTDIR] [-l] ACTIONS 
 
 Required options :
   -a  Asterisk version    (e.g. 20.9.2)
