@@ -7,7 +7,7 @@ apt -y install  autoconf \
  cmark-gfm \
  dahdi-source \
  debhelper-compat \
- debuild \
+ devscripts \
  default-libmysqlclient-dev \
  dpkg-dev \
  freetds-dev \
