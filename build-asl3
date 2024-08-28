@@ -1,18 +1,22 @@
 #!/usr/bin/bash
 
+AST_VER=${AST_VER:-""}
+RPT_VER=${RPT_VER:-""}
+REL_VER=${REL_VER:-"1"}
+
 set -e
 
 usage()
 {
     cat <<_EOT_ 1>&2
-Usage : $0 -a ASTV -v RPTV -r RELV [-d DESTDIR] [-l] ACTIONS 
+Usage : $0 -a ASTV -v RPTV [-r RELV] [-d DESTDIR] [-l] ACTIONS 
 
 Required options :
-  -a  Asterisk version    (e.g. 20.9.2)
-  -v  ASL/app_rpt version (e.g. 3.0.4)
-  -r  Release version     (e.g. 1)
+  -a  Asterisk version        (e.g. 20.9.2)
+  -v  ASL/app_rpt version     (e.g. 3.0.4)
 
 Optional options :
+  -r  Release version         (default: 1)
   -d  local install directory (default: "/")
   -l  Create merged source directory with symlinks
 
@@ -23,8 +27,11 @@ Actions (specify one or more) :
   install - "install" the build results, locally
   package - create Debian packages
 
-Note: specifying "build", "install", or "package" will, if needed, create
-the merged source directory.
+Note: specifying the "build", "install", or "package" actions will, if needed,
+create the merged source directory.
+
+Note: you can use the "AST_VER", "RPT_VER", and "REL_VER" environment variables
+to specify the Asterisk, ASL/app_rpt, and Release versions.
 _EOT_
     exit 1
 }
@@ -176,7 +183,7 @@ link_path()
     if [[ -f "$src_path" ]]; then
 	path=$(basename $src_path)
 	rel_dir=$(realpath --relative-to="$(dirname "$dst_path")" "$(dirname $src_path)")
-	ln -s "$rel_dir/$path" "$dst_path"
+	ln -f -s "$rel_dir/$path" "$dst_path"
     else
 	mkdir -p "${dst_path}"
 	( cd "$src_path" ; find . -mindepth 1 -path ".git" -prune -o -print )	\
@@ -186,7 +193,7 @@ link_path()
 	    if [[ -d "$src_path/$path" ]]; then
 		mkdir -p "$dst_path/$path"
 	    else
-		ln -s "$rel_dir/$path" "$dst_path/$path"
+		ln -f -s "$rel_dir/$path" "$dst_path/$path"
 	    fi
         done
     fi
@@ -300,8 +307,6 @@ create_build_directory()
 	# (note: the build dependencies have already been installed)
 	#
 	echo "Re-creating merged source directory (${MERGE_DIR})"
-	mv ${MERGE_DIR} ${MERGE_DIR}-REMOVE
-	sudo rm -rf ${MERGE_DIR}-REMOVE &
     fi
 
     #
@@ -320,7 +325,7 @@ create_build_directory()
     echo "Add version"
     rm -rf .version
     echo "${VSTR}" > .version
-    ( cd ChangeLogs && ln -s ChangeLog-${AST_VER}.md ChangeLog-${VSTR}.md5 )
+    ( cd ChangeLogs && ln -f -s ChangeLog-${AST_VER}.md ChangeLog-${VSTR}.md5 )
     rm debian/changelog
     debchange				\
 	--create			\
@@ -399,10 +404,8 @@ do_install()
     pushd "${MERGE_DIR}"
 
     echo "Installing (locally)"
-set -x
     sudo make install DESTDIR="${DESTDIR}"
     RC=$?
-set +x
     if [[ $RC -ne 0 ]]; then
 	echo "make install failed (exit code $RC)."	1>&2
 	exit 1
