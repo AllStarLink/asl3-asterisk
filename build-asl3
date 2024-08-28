@@ -81,7 +81,8 @@ EPOCH="2"
 FULL_REL="${REL}.deb$(lsb_release -rs 2> /dev/null)"
 VSTR="${AST_VER}+asl3-${RPT_VER}"
 
-BASE_DIR="$(dirname $(pwd -P))"
+BASE_DIR="$(pwd -P)"
+BASE_DIR="${BASE_DIR%/asl3-asterisk}"
 ASL3_ASTERISK_DIR="${BASE_DIR}/asl3-asterisk"
 ASTERISK_DIR="${BASE_DIR}/asterisk"
 APP_RPT_DIR="${BASE_DIR}/app_rpt"
@@ -260,6 +261,18 @@ add_asl3-asterisk()
     fi
 }
 
+merge_asterisk()
+{
+    copy_path "${ASTERISK_DIR}" "${MERGE_DIR}"
+
+    pushd "${MERGE_DIR}"
+    rm -f menuselect.makedeps
+    rm -f menuselect.makeopts
+    rm -f menuselect-tree
+    rm -f build_tools/menuselect-deps
+    popd
+}
+
 merge_app_rpt()
 {
     pushd "${APP_RPT_DIR}"
@@ -312,7 +325,9 @@ create_build_directory()
     #
     # Create the merged build directory
     #
-    copy_path "${ASTERISK_DIR}" "${MERGE_DIR}"
+
+    echo "Add \"asterisk\""
+    merge_asterisk
 
     echo "Add \"app_rpt\" modules, apply patches"
     merge_app_rpt
