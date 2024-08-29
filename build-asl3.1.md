@@ -80,7 +80,7 @@ The **build** action compiles the source code in the merged directory.
 
 The **install** action performs a "make install DESTDIR=/" in the merged directory.
 
-Note: this action does **NOT** include everything in the "asl3-asterisk-*" packages.  The focus is on executables (e.g. asterisk) and modules (e.g. app_rpt.so, chan_simpleusb.so, etc).  The assumption we have made is that you are working on software (code) changes and you wish to test them on a system that already has ASL3 installed.
+Note: this action does **NOT** include everything in the "asl3-asterisk-*" packages.  The focus is on executables (e.g. asterisk) and modules (e.g. app\_rpt.so, chan_simpleusb.so, etc).  The assumption we have made is that you are working on software (code) changes and you wish to test them on a system that already has ASL3 installed.
 
 ### Action : **package**
 
@@ -108,24 +108,24 @@ Note: the `build-asl3` script is smart.  If the merged directory does not exist 
 
 The following is an example of how you might use the `build-asl3` command to make a code change.
 
-1. To start, you will want to grab a copy of the asl3-asterisk project (we need the "build-asl3" command).
+1. To start, you will want to grab a copy of the asl3-asterisk project (you need the "build-asl3" command).
 
 	```
 git clone https://github.com/AllStarLink/asl3-asterisk.git
 ```
 
-2.  Optionally, you can [pre-]fetch a copy of the "asterisk" project and checkout the "tag" of the version you wish to use.  If you skip this step (and that's OK) we will download a copy of the "asterisk" source code.
+2.  Optionally, you can [pre-]fetch a copy of the "asterisk" project and checkout the "tag" of the version you wish to use.  If you skip this step (and that's OK) we will download a copy of the "asterisk" project.
 
 	```
 git clone https://github.com/asterisk/asterisk.git
 (cd asterisk; git checkout 20.9.2)
 ```
 
-3. Optionally, you can [pre-]fetch a copy of the "app\_rpt" project.  As above, if you wish to work with a specific version of "app\_rpt" then checkout it's "tag".   If you skip this step (and that's OK) we will download a copy of the "app\_rpt" source code.
+3. Optionally, you can [pre-]fetch a copy of the "app\_rpt" project.  As above, to work with a specific version of "app\_rpt" then checkout it's "tag".  If you skip this step (and that's OK) we will download a copy of the "app\_rpt" project.
 
 	```
 git clone https://github.com/AllStarLink/app_rpt.git
-(cd app_rpt; git checkout 3.0.4)     <-- optional
+(cd app_rpt; git checkout 3.0.4)     <-- optional, i
 ```
 
 4. Create (or update) the merged source directory.
@@ -151,7 +151,13 @@ git clone https://github.com/AllStarLink/app_rpt.git
 
 7. Making iterative changes
 
-	If you need to make changes to your source code, make the updates in the "asterisk", "app\_rpt", and "asl3-asterisk" directories.  Then, repeat step 4 (update the source), step 5 (build), and step 6 (install/test).
+	One must remember that we are building ASL3 Asterisk + app\_rpt using source code that is merged from multiple locations.
+Where changes need to be located can be a challenge.
+Ideally, one would make a change in the "asterisk", "app\_rpt", and "asl3-asterisk" source directories but that's not the merged directory that is used for building.
+
+	After making source code changes you need to re-exec `build-asl3` with the "source" action to update the merged directory and then use the "build" action to recompile what's changed.
+	
+	Once you have updated your source code and recompiled you can than proceed to installing / testing your changes.
 
 ### Experimental Development
 

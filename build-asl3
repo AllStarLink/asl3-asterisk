@@ -163,14 +163,36 @@ copy_path()
     src_path="$1"
     dst_path="$2"
 
-    echo "Copy \"${src_path}\" to \"${dst_path}\""
-
     if [[ -f "$src_path" ]]; then
+	echo "Copy \"$src_path/$path\" --> \"$dst_path/$path\""
 	cp -p "${src_path}" "${dst_path}"
     else
-	mkdir -p "${dst_path}"
-	tar --create --directory="${src_path}" --file=- .	\
-	| tar --extract --directory="${dst_path}" --file=-
+	( cd "$src_path" ; find . -path ".git" -prune -o -print )	\
+	| while read -r path; do
+	    path="${path#./}"
+	    if [[ -d "$src_path/$path" ]]; then
+		if [[ ! -d "$dst_path/$path" ]]; then
+		    echo "Copy \"$src_path/$path\" --> \"$dst_path/$path\""
+		    mkdir -p "$dst_path/$path"
+		    tar --create --directory="${src_path}" --file=- .	\
+		    | tar --extract --directory="${dst_path}" --file=-
+		fi
+	    elif [[ -f "$src_path/$path" ]]; then
+		if [[ -f "$dst_path/$path" ]]; then
+		    if [ "$(stat -c %Y "$src_path/$path")" -gt "$(stat -c %Y "$dst_path/$path")" ]; then
+			echo "Update \"$src_path/$path\" --> \"$dst_path/$path\""
+			cp -p "$src_path/$path" "$dst_path/$path"
+		    fi
+		else
+		    echo "Add \"$src_path/$path\" --> \"$dst_path/$path\""
+		    cp -p "$src_path/$path" "$dst_path/$path"
+		fi
+	    else
+		echo "???? \"$src_path/$path\""
+		ls -ld $src_path/$path
+	    fi
+        done
+
     fi
 }
 
@@ -202,11 +224,11 @@ link_path()
 
 # ---------- ---------- ---------- ---------- ---------- ----------
 
-check_patched_files()
+prepare_patched_files()
 {
     patch="$1"
 
-    for file in $(grep -E '^--- |^\+\+\+ ' $patch | cut -d' ' -f2 | sed 's|^a/||;s|^b/||'); do
+    for file in $(grep -E '^--- |^\+\+\+ ' $patch | cut -d' ' -f2 | sed 's|^a/||;s|^b/||' | sort -u); do
 	if [[ -L "$file" ]]; then
 	    echo "replacing symlink'd file: $file"
 	    cp -p $file $file-ORIG
@@ -220,17 +242,37 @@ apply_patch()
     patch="$1"
 
     if [[ $USE_SYMLINKS -ne 0 ]]; then
-	check_patched_files "${patch}"
+	prepare_patched_files "${patch}"
     fi
+    echo "info: applying patch: $patch"
     patch -p1 < "${patch}"
-#   rm "${patch}"
 }
 
 prepare_patch_series()
 {
     for patch in $(cat debian/patches/series); do
-	check_patched_files "debian/patches/$patch"
+	prepare_patched_files "debian/patches/$patch"
     done
+}
+
+revert_patch()
+{
+    patch="$1"
+
+    if [[ ! -f "${patch}" ]]; then
+	return
+    fi
+
+    # check that all of the files being updated are regular files (and not symlinks)
+    for file in $(grep -E '^--- |^\+\+\+ ' $patch | cut -d' ' -f2 | sed 's|^a/||;s|^b/||' | sort -u); do
+	if [[ -L "$file" ]]; then
+	    echo "not reverting patch: $patch (can't patch a symlink: $file)"
+	    return
+	fi
+    done
+
+    echo "info: unapplying patch: $patch"
+    patch -p1 -R < "${patch}"
 }
 
 # ---------- ---------- ---------- ---------- ---------- ----------
@@ -263,18 +305,27 @@ add_asl3-asterisk()
 
 merge_asterisk()
 {
-    copy_path "${ASTERISK_DIR}" "${MERGE_DIR}"
+    if [[ -f "${MERGE_DIR}/.BEFORE-BUILD-APPLIED" ]]; then
+	# Revert "asterisk" patches
+	pushd "${MERGE_DIR}"
+	dpkg-source --after-build .
+	rm -f .BEFORE-BUILD-APPLIED
+	popd
+    fi
 
-    pushd "${MERGE_DIR}"
-    rm -f menuselect.makedeps
-    rm -f menuselect.makeopts
-    rm -f menuselect-tree
-    rm -f build_tools/menuselect-deps
-    popd
+    copy_path "${ASTERISK_DIR}"		"${MERGE_DIR}"
 }
 
 merge_app_rpt()
 {
+    if [[ -d "${MERGE_DIR}" ]]; then
+	pushd "${MERGE_DIR}"
+	revert_patch Makefiles.diff
+	revert_patch res/Makefile.diff
+	revert_patch utils/Makefile.diff
+	popd
+    fi
+
     pushd "${APP_RPT_DIR}"
     copy_path "Makefiles.diff"		"${MERGE_DIR}/Makefiles.diff"
     copy_path "apps"			"${MERGE_DIR}/apps"
@@ -359,6 +410,7 @@ create_build_directory()
 
     echo "Prepare source for building, apply patches"
     dpkg-source --before-build .
+    touch .BEFORE-BUILD-APPLIED
 
     popd
 }
