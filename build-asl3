@@ -1,22 +1,36 @@
 #!/usr/bin/bash
 
-AST_VER=${AST_VER:-""}
-RPT_VER=${RPT_VER:-""}
-REL_VER=${REL_VER:-"1"}
-
 set -e
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+# Get the default Asterisk + app_rpt versions from newest package version
+ASL_PKG_INFO=$(apt-cache show asl3-asterisk	2>/dev/null	\
+	       | grep Version					\
+	       | head -1					\
+	      )
+ASL_PKG_INFO="${ASL_PKG_INFO#Version: *:}"
+AST_PKG="${ASL_PKG_INFO%+*}"
+ASL_PKG_INFO="${ASL_PKG_INFO#${AST_PKG}+asl3-}"
+RPT_PKG="${ASL_PKG_INFO%-*}"
+ASL_PKG_INFO="${ASL_PKG_INFO#${RPT_PKG}-}"
+REL_PKG="${ASL_PKG_INFO%.deb*}"
+
+AST_VER="${AST_VER:-$AST_PKG}"
+RPT_VER="${RPT_VER:-$RPT_PKG}"
+REL_VER="${REL_VER:-$REL_PKG}"
+
+# ---------- ---------- ---------- ---------- ---------- ----------
 
 usage()
 {
     cat <<_EOT_ 1>&2
-Usage : $0 -a ASTV -v RPTV [-r RELV] [-d DESTDIR] [-l] ACTIONS 
+Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] ACTIONS 
 
-Required options :
+Options :
   -a  Asterisk version        (e.g. 20.9.2)
   -v  ASL/app_rpt version     (e.g. 3.0.4)
-
-Optional options :
-  -r  Release version         (default: 1)
+  -r  Release version         (e.g. 1)
   -d  local install directory (default: "/")
   -l  Create merged source directory with symlinks
 
@@ -30,15 +44,18 @@ Actions (specify one or more) :
 Note: specifying the "build", "install", or "package" actions will, if needed,
 create the merged source directory.
 
-Note: you can use the "AST_VER", "RPT_VER", and "REL_VER" environment variables
-to specify the Asterisk, ASL/app_rpt, and Release versions.
+Note: the Asterisk, ASL/app_rpt, and Release versions will default to those
+of the "asl3-asterisk" package.  You can also use the "AST_VER", "RPT_VER",
+and "REL_VER" environment variables to specify the versions.
 _EOT_
     exit 1
 }
 
+# ---------- ---------- ---------- ---------- ---------- ----------
+
 DESTDIR=${DESTDIR:-"/"}
 EDITOR=${EDITOR:-${ALT_EDIT:-vim}}
-EMAIL=${EMAIL:-"builder@allstarlink.org"}
+export EMAIL=${EMAIL:-"builder@allstarlink.org"}
 USE_SYMLINKS=0
 
 while getopts "a:d:lr:v:" o; do
@@ -50,7 +67,7 @@ while getopts "a:d:lr:v:" o; do
 	DESTDIR=${OPTARG}
 	;;
     "r" )
-	REL=${OPTARG}
+	REL_VER=${OPTARG}
 	;;
     "v" )
 	RPT_VER=${OPTARG}
@@ -60,7 +77,7 @@ while getopts "a:d:lr:v:" o; do
 	;;
     * )
 	echo "***"				1>&2
-	echo "*** unrecognized option \"${o}\""	1>&2
+	echo "*** Unrecognized option \"${o}\""	1>&2
 	echo "***"				1>&2
 	echo ""					1>&2
 	usage
@@ -69,16 +86,16 @@ while getopts "a:d:lr:v:" o; do
 done
 shift $((OPTIND-1))
 
-if [ -z "${AST_VER}" ] || [ -z "${RPT_VER}" ] || [ -z "${REL}" ]; then
+if [[ -z "${AST_VER}" || -z "${RPT_VER}" || -z "${REL_VER}" ]]; then
     echo "***"					1>&2
-    echo "*** version(s) not specified"		1>&2
+    echo "*** Version(s) not specified"		1>&2
     echo "***"					1>&2
     echo ""					1>&2
     usage
 fi
 
 EPOCH="2"
-FULL_REL="${REL}.deb$(lsb_release -rs 2> /dev/null)"
+FULL_REL="${REL_VER}.deb$(lsb_release -rs 2> /dev/null)"
 VSTR="${AST_VER}+asl3-${RPT_VER}"
 
 BASE_DIR="$(pwd -P)"
@@ -96,7 +113,7 @@ DO_PACKAGE=0
 
 if [[ $# -eq 0 ]]; then
     echo "***"					1>&2
-    echo "*** no action(s) specified"		1>&2
+    echo "*** No action(s) specified"		1>&2
     echo "***"					1>&2
     echo ""					1>&2
     usage
@@ -133,7 +150,7 @@ while [ $# -gt 0 ]; do
 	fi
 	if [[ $USE_SYMLINKS -ne 0 || -L "${MERGE_DIR}/README.md" ]]; then
 	    echo "***"							1>&2
-	    echo "*** can't create packages with symlink'd source"	1>&2
+	    echo "*** Can't create packages with symlink'd source"	1>&2
 	    echo "***"							1>&2
 	    exit 1
 	fi

@@ -4,20 +4,17 @@
 
 # NAME
 
-build-asl3 - Build ASL3 Asterisk + app_rpt
+build-asl3 - Build ASL3 Asterisk + app\_rpt
 
 # SYNOPSIS
 
-Usage: `build-asl3 -a ASTV -v RPTV [-r RELV] [-d DESTDIR] [-l] ACTIONS`
+Usage: `build-asl3 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] ACTIONS`
 
-Required options :
+Options :
 
-* -a  Asterisk version    (e.g. 20.9.2)
-* -v  ASL/app_rpt version (e.g. 3.0.4)
-
-Optional options :
-
-* -r  Release version (default: 1)
+* -a Asterisk version (default: installed (or latest) version, e.g. "20.9.2")
+* -v ASL/app\_rpt version (default: installed (or latest) version, e.g. "3.0.4")
+* -r  Release version (default: installed (or latest) version, e.g. "1")
 * -d  local install directory (default: "/")
 * -l  Create merged source directory with symlinks
 
@@ -29,13 +26,16 @@ Actions (specify one or more) :
 * install - "install" the build results, locally
 * package - create Debian packages
 
-Note: specifying the **build**, **install**, or **package** actions will, if needed, create the merged source directory.
+Note: specifying the "build", "install", or "package" actions will, if needed,
+create the merged source directory.
 
-Note: you can use the **AST\_VER**, **RPT\_VER**, and **REL\_VER** environment variables to specify the Asterisk, ASL/app_rpt, and Release versions.
+Note: the Asterisk, ASL/app\_rpt, and Release versions will default to those
+of the "asl3-asterisk" package.  You can also use the "AST_VER", "RPT_VER",
+and "REL_VER" environment variables to specify the versions.
 
 # DESCRIPTION
 
-ASL3 Asterisk + app_rpt includes multiple source code projects including [Asterisk](https://github.com/asterisk/asterisk.git), [app_rpt](https://github.com/AllStarLink/app_rpt.git), and [asl3-asterisk](https://github.com/AllStarLink/asl3-asterisk.git).
+ASL3 Asterisk + app\_rpt includes multiple source code projects including [Asterisk](https://github.com/asterisk/asterisk.git), [app\_rpt](https://github.com/AllStarLink/app_rpt.git), and [asl3-asterisk](https://github.com/AllStarLink/asl3-asterisk.git).
 
 The command supports 2 different (but related) workflows :
 
@@ -50,7 +50,7 @@ When using the `build-asl3` command your system works with the following directo
 <base directory>
   asl3-asterisk-AST_VER+asl3-ASL_VER
   asterisk
-  app_rpt
+  app\_rpt
   asl3-asterisk
 ```
 
@@ -60,7 +60,7 @@ Any Debian packages created by `build-asl3` will also be stored in the "\<base d
 
 ## WORKFLOW ACTIONS
 
-Each workflow uses a subset of "actions".
+Each workflow uses one or more of the following "actions".
 
 ### Action : **source**
 
@@ -109,66 +109,70 @@ Note: the `build-asl3` script is smart.  If the merged directory does not exist 
 The following is an example of how you might use the `build-asl3` command to make a code change.
 
 1. To start, you will want to grab a copy of the asl3-asterisk project (you need the "build-asl3" command).
+   
+   ```
+   git clone https://github.com/AllStarLink/asl3-asterisk.git
+   ```
 
-	```
-git clone https://github.com/AllStarLink/asl3-asterisk.git
-```
-
-2.  Optionally, you can [pre-]fetch a copy of the "asterisk" project and checkout the "tag" of the version you wish to use.  If you skip this step (and that's OK) we will download a copy of the "asterisk" project.
-
-	```
-git clone https://github.com/asterisk/asterisk.git
-(cd asterisk; git checkout 20.9.2)
-```
+2. Optionally, you can [pre-]fetch a copy of the "asterisk" project and checkout the "tag" of the version you wish to use.  If you skip this step (and that's OK) we will download a copy of the "asterisk" project.
+   
+   ```
+   git clone https://github.com/asterisk/asterisk.git
+   (cd asterisk; git checkout 20.9.2)
+   ```
 
 3. Optionally, you can [pre-]fetch a copy of the "app\_rpt" project.  As above, to work with a specific version of "app\_rpt" then checkout it's "tag".  If you skip this step (and that's OK) we will download a copy of the "app\_rpt" project.
-
-	```
-git clone https://github.com/AllStarLink/app_rpt.git
-(cd app_rpt; git checkout 3.0.4)     <-- optional, i
-```
+   
+   ```
+   git clone https://github.com/AllStarLink/app_rpt.git
+   (cd app_rpt; git checkout 3.0.4)     <-- optional, i
+   ```
 
 4. Create (or update) the merged source directory.
-
-	```
-	cd asl3-asterisk
-	./build-asl3 -a 20.9.2 -v 3.0.4 -r 1 source
-	```
+   
+   ```
+   cd asl3-asterisk
+   ./build-asl3 source
+   ```
 
 5. Build the sources in the merged source directory.
-
-	```
-	cd asl3-asterisk
-	./build-asl3 -a 20.9.2 -v 3.0.4 -r 1 build
-	```
+   
+   ```
+   cd asl3-asterisk
+   ./build-asl3 build
+   ```
 
 6. Install (and test) your changes.
-
-	```
-	cd asl3-asterisk
-	./build-asl3 -a 20.9.2 -v 3.0.4 -r 1 install
-	```
+   
+   ```
+   cd asl3-asterisk
+   ./build-asl3 install
+   ```
 
 7. Making iterative changes
-
-	One must remember that we are building ASL3 Asterisk + app\_rpt using source code that is merged from multiple locations.
-Where changes need to be located can be a challenge.
-Ideally, one would make a change in the "asterisk", "app\_rpt", and "asl3-asterisk" source directories but that's not the merged directory that is used for building.
-
-	After making source code changes you need to re-exec `build-asl3` with the "source" action to update the merged directory and then use the "build" action to recompile what's changed.
-	
-	Once you have updated your source code and recompiled you can than proceed to installing / testing your changes.
+   
+   One must remember that we are building ASL3 Asterisk + app\_rpt using source code that is merged from multiple locations.  Where changes need to be located can be a challenge.  Ideally, one would make a change in the "asterisk", "app\_rpt", and "asl3-asterisk" source directories but that's not the merged directory that is used for building.
+   
+   After making source code changes you need to re-exec `build-asl3` with the "source" action to update the merged directory and then use the "build" action to recompile what's changed.
+   
+   Once you have updated your source code and recompiled you can than proceed to installing / testing your changes.
 
 ### Experimental Development
 
-The `build-asl3` command usage includes a "-l" option that, for now, should be considered "experimental" due to it's limited testing.
-This option changes how the "asterisk", "app\_rpt", and "asl3-asterisk" directories are merged together.
-Rather than copying each file to the merged directory the command will, instead, symlink the files back to the source directories.
-What this means is that you can make changes in the source directories and not need to re-exec `build-asl3` with the "source" action.
+The `build-asl3` command usage includes a "-l" option that, for now, should be considered "experimental" due to it's limited testing.  This option changes how the "asterisk", "app\_rpt", and "asl3-asterisk" directories are merged together.  Rather than copying each file to the merged directory the command will, instead, symlink the files back to the source directories.  What this means is that you can make changes in the source directories and not need to re-exec `build-asl3` with the "source" action.
 
 Note: some of the files in the merged directory are patched.  If you are making source code changes to any of these [patched] files then you should not use the "-l" option.
 
 Note: the "-l" option can NOT be used when creating Debian packages.
+
+# ENVIRONMENT
+
+| Env Var | Description                                      |
+| ------- | ------------------------------------------------ |
+| AST_VER | "Asterisk" version (to include in merged source) |
+| RPT_VER | "app\_rpt" version (to include in merged source) |
+| REL_VER | Release version (for Debian packaging)           |
+| EMAIL   | E-mail address (for Debian packaging)            |
 
 # BUGS
 
