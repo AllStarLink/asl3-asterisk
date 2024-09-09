@@ -27,12 +27,12 @@ if [ -d apps/app_rpt ]; then
 fi
 
 if [ -d channels/xpmr ]; then
-	rm -rf channels/apmr
+	rm -rf channels/xpmr
 fi
 
 cp -r $APPRPT/apps/app_rpt* $APPRPT/apps/app_gps* apps/
 cp -r $APPRPT/channels/* channels/
-mkdir configs/asl3
+mkdir -p configs/asl3
 cp $APPRPT/configs/rpt/* configs/asl3/
 cp $APPRPT/include/asterisk/* include/asterisk/
 cp $APPRPT/res/* res/

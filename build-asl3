@@ -1,0 +1,541 @@
+#!/usr/bin/bash
+
+set -e
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+# Get the default Asterisk + app_rpt versions from newest package version
+ASL_PKG_INFO=$(apt-cache show asl3-asterisk	2>/dev/null	\
+	       | grep Version					\
+	       | head -1					\
+	      )
+ASL_PKG_INFO="${ASL_PKG_INFO#Version: *:}"
+AST_PKG="${ASL_PKG_INFO%+*}"
+ASL_PKG_INFO="${ASL_PKG_INFO#${AST_PKG}+asl3-}"
+RPT_PKG="${ASL_PKG_INFO%-*}"
+ASL_PKG_INFO="${ASL_PKG_INFO#${RPT_PKG}-}"
+REL_PKG="${ASL_PKG_INFO%.deb*}"
+
+AST_VER="${AST_VER:-$AST_PKG}"
+RPT_VER="${RPT_VER:-$RPT_PKG}"
+REL_VER="${REL_VER:-$REL_PKG}"
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+usage()
+{
+    cat <<_EOT_ 1>&2
+Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] ACTIONS 
+
+Options :
+  -a  Asterisk version        (e.g. 20.9.2)
+  -v  ASL/app_rpt version     (e.g. 3.0.4)
+  -r  Release version         (e.g. 1)
+  -d  local install directory (default: "/")
+  -l  Create merged source directory with symlinks
+
+Actions (specify one or more) :
+  source  - create the merged source directory
+  clean   - "clean" the merged source directory
+  build   - "build" the source code
+  install - "install" the build results, locally
+  package - create Debian packages
+
+Note: specifying the "build", "install", or "package" actions will, if needed,
+create the merged source directory.
+
+Note: the Asterisk, ASL/app_rpt, and Release versions will default to those
+of the "asl3-asterisk" package.  You can also use the "AST_VER", "RPT_VER",
+and "REL_VER" environment variables to specify the versions.
+_EOT_
+    exit 1
+}
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+DESTDIR=${DESTDIR:-"/"}
+EDITOR=${EDITOR:-${ALT_EDIT:-vim}}
+export EMAIL=${EMAIL:-"builder@allstarlink.org"}
+USE_SYMLINKS=0
+
+while getopts "a:d:lr:v:" o; do
+    case "${o}" in
+    "a" )
+	AST_VER=${OPTARG}
+	;;
+    "d" )
+	DESTDIR=${OPTARG}
+	;;
+    "r" )
+	REL_VER=${OPTARG}
+	;;
+    "v" )
+	RPT_VER=${OPTARG}
+	;;
+    "l" )
+	USE_SYMLINKS=1
+	;;
+    * )
+	echo "***"				1>&2
+	echo "*** Unrecognized option \"${o}\""	1>&2
+	echo "***"				1>&2
+	echo ""					1>&2
+	usage
+	;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [[ -z "${AST_VER}" || -z "${RPT_VER}" || -z "${REL_VER}" ]]; then
+    echo "***"					1>&2
+    echo "*** Version(s) not specified"		1>&2
+    echo "***"					1>&2
+    echo ""					1>&2
+    usage
+fi
+
+EPOCH="2"
+FULL_REL="${REL_VER}.deb$(lsb_release -rs 2> /dev/null)"
+VSTR="${AST_VER}+asl3-${RPT_VER}"
+
+BASE_DIR="$(pwd -P)"
+BASE_DIR="${BASE_DIR%/asl3-asterisk}"
+ASL3_ASTERISK_DIR="${BASE_DIR}/asl3-asterisk"
+ASTERISK_DIR="${BASE_DIR}/asterisk"
+APP_RPT_DIR="${BASE_DIR}/app_rpt"
+MERGE_DIR="${BASE_DIR}/asl3-asterisk-${VSTR}"
+
+DO_SOURCE=0
+DO_CLEAN=0
+DO_BUILD=0
+DO_INSTALL=0
+DO_PACKAGE=0
+
+if [[ $# -eq 0 ]]; then
+    echo "***"					1>&2
+    echo "*** No action(s) specified"		1>&2
+    echo "***"					1>&2
+    echo ""					1>&2
+    usage
+fi
+
+while [ $# -gt 0 ]; do
+    case "${1}" in
+    "source" )
+	DO_SOURCE=1
+	;;
+    "clean" )
+	DO_CLEAN=1
+	;;
+    "build" )
+	if [[ ! -d "${MERGE_DIR}" ]]; then
+	    DO_SOURCE=1
+	fi
+	DO_BUILD=1
+	;;
+    "install" )
+	if [[ ! -d "${MERGE_DIR}" ]]; then
+	    DO_SOURCE=1
+	fi
+	if [[ $DO_SOURCE -gt 0 ]]; then
+	    DO_BUILD=1
+	elif [[ ! -x "${MERGE_DIR}/main/asterisk" ]]; then
+	    DO_BUILD=1
+	fi
+	DO_INSTALL=1
+	;;
+    "package" )
+	if [[ ! -d "${MERGE_DIR}" ]]; then
+	    DO_SOURCE=1
+	fi
+	if [[ $USE_SYMLINKS -ne 0 || -L "${MERGE_DIR}/README.md" ]]; then
+	    echo "***"							1>&2
+	    echo "*** Can't create packages with symlink'd source"	1>&2
+	    echo "***"							1>&2
+	    exit 1
+	fi
+	if [[ $DO_SOURCE -gt 0 ]]; then
+	    DO_BUILD=1
+	elif [[ ! -x "${MERGE_DIR}/main/asterisk" ]]; then
+	    DO_BUILD=1
+	fi
+	DO_PACKAGE=1
+	;;
+    * )
+	usage
+	;;
+    esac
+    shift
+done
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+copy_path()
+{
+    if [[ $USE_SYMLINKS -ne 0 ]]; then
+	link_path "$1" "$2"
+	return
+    fi
+
+    src_path="$1"
+    dst_path="$2"
+
+    if [[ -f "$src_path" ]]; then
+	echo "Copy \"$src_path/$path\" --> \"$dst_path/$path\""
+	cp -p "${src_path}" "${dst_path}"
+    else
+	( cd "$src_path" ; find . -path ".git" -prune -o -print )	\
+	| while read -r path; do
+	    path="${path#./}"
+	    if [[ -d "$src_path/$path" ]]; then
+		if [[ ! -d "$dst_path/$path" ]]; then
+		    echo "Copy \"$src_path/$path\" --> \"$dst_path/$path\""
+		    mkdir -p "$dst_path/$path"
+		    tar --create --directory="${src_path}" --file=- .	\
+		    | tar --extract --directory="${dst_path}" --file=-
+		fi
+	    elif [[ -f "$src_path/$path" ]]; then
+		if [[ -f "$dst_path/$path" ]]; then
+		    if [ "$(stat -c %Y "$src_path/$path")" -gt "$(stat -c %Y "$dst_path/$path")" ]; then
+			echo "Update \"$src_path/$path\" --> \"$dst_path/$path\""
+			cp -p "$src_path/$path" "$dst_path/$path"
+		    fi
+		else
+		    echo "Add \"$src_path/$path\" --> \"$dst_path/$path\""
+		    cp -p "$src_path/$path" "$dst_path/$path"
+		fi
+	    else
+		echo "???? \"$src_path/$path\""
+		ls -ld $src_path/$path
+	    fi
+        done
+
+    fi
+}
+
+link_path()
+{
+    src_path="$1"
+    dst_path="$2"
+
+    echo "Link \"${src_path}\" to \"${dst_path}\""
+
+    if [[ -f "$src_path" ]]; then
+	path=$(basename $src_path)
+	rel_dir=$(realpath --relative-to="$(dirname "$dst_path")" "$(dirname $src_path)")
+	ln -f -s "$rel_dir/$path" "$dst_path"
+    else
+	mkdir -p "${dst_path}"
+	( cd "$src_path" ; find . -mindepth 1 -path ".git" -prune -o -print )	\
+	| while read -r path; do
+	    path="${path#./}"
+	    rel_dir=$(realpath --relative-to="$(dirname "$dst_path/$path")" "$src_path")
+	    if [[ -d "$src_path/$path" ]]; then
+		mkdir -p "$dst_path/$path"
+	    else
+		ln -f -s "$rel_dir/$path" "$dst_path/$path"
+	    fi
+        done
+    fi
+}
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+prepare_patched_files()
+{
+    patch="$1"
+
+    for file in $(grep -E '^--- |^\+\+\+ ' $patch | cut -d' ' -f2 | sed 's|^a/||;s|^b/||' | sort -u); do
+	if [[ -L "$file" ]]; then
+	    echo "replacing symlink'd file: $file"
+	    cp -p $file $file-ORIG
+	    mv $file-ORIG $file
+	fi
+    done
+}
+
+apply_patch()
+{
+    patch="$1"
+
+    if [[ $USE_SYMLINKS -ne 0 ]]; then
+	prepare_patched_files "${patch}"
+    fi
+    echo "info: applying patch: $patch"
+    patch -p1 < "${patch}"
+}
+
+prepare_patch_series()
+{
+    for patch in $(cat debian/patches/series); do
+	prepare_patched_files "debian/patches/$patch"
+    done
+}
+
+revert_patch()
+{
+    patch="$1"
+
+    if [[ ! -f "${patch}" ]]; then
+	return
+    fi
+
+    # check that all of the files being updated are regular files (and not symlinks)
+    for file in $(grep -E '^--- |^\+\+\+ ' $patch | cut -d' ' -f2 | sed 's|^a/||;s|^b/||' | sort -u); do
+	if [[ -L "$file" ]]; then
+	    echo "not reverting patch: $patch (can't patch a symlink: $file)"
+	    return
+	fi
+    done
+
+    echo "info: unapplying patch: $patch"
+    patch -p1 -R < "${patch}"
+}
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+add_asterisk()
+{
+    if [[ ! -d "${ASTERISK_DIR}" ]]; then
+	echo "Cloning \"asterisk\", tag==${AST_VER}"
+	git clone https://github.com/asterisk/asterisk.git "${ASTERISK_DIR}"
+	( cd "${ASTERISK_DIR}"; git checkout $AST_VER )
+    fi
+}
+
+add_app_rpt()
+{
+    if [[ ! -d "${APP_RPT_DIR}" ]]; then
+	echo "Cloning \"app_rpt\""
+	git clone https://github.com/AllStarLink/app_rpt.git "${APP_RPT_DIR}"
+#	( cd "${APP_RPT_DIR}"; git checkout $RPT_VER )
+    fi
+}
+
+add_asl3-asterisk()
+{
+    if [[ ! -d "${ASL3_ASTERISK_DIR}" ]]; then
+	echo "Cloning \"asl3-asterisk\""
+	git clone https://github.com/AllStarLink/asl3-asterisk.git "${ASL3_ASTERISK_DIR}"
+    fi
+}
+
+merge_asterisk()
+{
+    if [[ -f "${MERGE_DIR}/.BEFORE-BUILD-APPLIED" ]]; then
+	# Revert "asterisk" patches
+	pushd "${MERGE_DIR}"
+	dpkg-source --after-build .
+	rm -f .BEFORE-BUILD-APPLIED
+	popd
+    fi
+
+    copy_path "${ASTERISK_DIR}"		"${MERGE_DIR}"
+}
+
+merge_app_rpt()
+{
+    if [[ -d "${MERGE_DIR}" ]]; then
+	pushd "${MERGE_DIR}"
+	revert_patch Makefiles.diff
+	revert_patch res/Makefile.diff
+	revert_patch utils/Makefile.diff
+	popd
+    fi
+
+    pushd "${APP_RPT_DIR}"
+    copy_path "Makefiles.diff"		"${MERGE_DIR}/Makefiles.diff"
+    copy_path "apps"			"${MERGE_DIR}/apps"
+    copy_path "channels"		"${MERGE_DIR}/channels"
+    copy_path "configs/rpt"		"${MERGE_DIR}/configs/asl3"
+    copy_path "include"			"${MERGE_DIR}/include"
+    copy_path "res"			"${MERGE_DIR}/res"
+    copy_path "utils"			"${MERGE_DIR}/utils"
+    popd
+
+    pushd "${MERGE_DIR}"
+    apply_patch Makefiles.diff
+    apply_patch res/Makefile.diff
+    apply_patch utils/Makefile.diff
+    popd
+}
+
+merge_asl3_asterisk()
+{
+    pushd "${ASL3_ASTERISK_DIR}"
+    copy_path "debian"			"${MERGE_DIR}/debian"
+    copy_path "rpt-sounds"		"${MERGE_DIR}/rpt-sounds"
+    copy_path "etc"			"${MERGE_DIR}/etc"
+    popd
+}
+
+create_build_directory()
+{
+    if [[ ! -d "${MERGE_DIR}" ]]; then
+	#
+	# Make sure we have all of the build dependencies
+	#
+	echo "Installing build dependencies"
+	sudo "${ASL3_ASTERISK_DIR}/install-build-deps"
+
+	#
+	# Create the merged build directory
+	#
+	echo "Creating merged source directory (${MERGE_DIR})"
+    else
+	#
+	# Re-create the merged build directory
+	# (note: the build dependencies have already been installed)
+	#
+	echo "Re-creating merged source directory (${MERGE_DIR})"
+    fi
+
+    #
+    # Create the merged build directory
+    #
+
+    echo "Add \"asterisk\""
+    merge_asterisk
+
+    echo "Add \"app_rpt\" modules, apply patches"
+    merge_app_rpt
+
+    echo "Add \"debian\", \"rpt-sounds\""
+    merge_asl3_asterisk
+
+    pushd "${MERGE_DIR}"
+
+    echo "Add version"
+    rm -rf .version
+    echo "${VSTR}" > .version
+    ( cd ChangeLogs && ln -f -s ChangeLog-${AST_VER}.md ChangeLog-${VSTR}.md5 )
+    rm debian/changelog
+    debchange				\
+	--create			\
+	--package asl3-asterisk 	\
+	-v ${EPOCH}:${VSTR}-${FULL_REL}	\
+	--				\
+	"see https://github.com/AllStarLink/app_rpt"
+    debchange				\
+	--release			\
+	""
+
+    if [[ $USE_SYMLINKS -ne 0 ]]; then
+	echo "Prepare to-be-patched files"
+	prepare_patch_series
+    fi
+
+    echo "Prepare source for building, apply patches"
+    dpkg-source --before-build .
+    touch .BEFORE-BUILD-APPLIED
+
+    popd
+}
+
+do_source()
+{
+    # Make sure that we have a copy of the "asterisk" repo
+    add_asterisk
+
+    # Make sure that we have a copy of the "app_rpt" repo
+    add_app_rpt
+
+    # Make sure that we have a copy of the "asl3-asterisk" repo
+    add_asl3-asterisk
+
+    # Create our merged build directory
+    create_build_directory
+}
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+do_clean()
+{
+    pushd "${MERGE_DIR}"
+
+    echo "Clean (after building/packaging)"
+    dh clean
+    RC=$?
+    if [[ $RC -ne 0 ]]; then
+	echo "dh clean failed (exit code $RC)."		1>&2
+	exit 1
+    fi
+
+    popd
+}
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+do_build()
+{
+    pushd "${MERGE_DIR}"
+
+    echo "Build"
+    dh build -j$(nproc --all)
+    RC=$?
+    if [[ $RC -ne 0 ]]; then
+	echo "dh build failed (exit code $RC)."		1>&2
+	exit 1
+    fi
+
+    popd
+}
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+do_install()
+{
+    pushd "${MERGE_DIR}"
+
+    echo "Installing (locally)"
+    sudo make install DESTDIR="${DESTDIR}"
+    RC=$?
+    if [[ $RC -ne 0 ]]; then
+	echo "make install failed (exit code $RC)."	1>&2
+	exit 1
+    fi
+
+    popd
+}
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+do_package()
+{
+    pushd "${MERGE_DIR}"
+
+    echo "Create the [debian] package"
+    fakeroot dh binary -j$(nproc --all)
+    RC=$?
+    if [[ $RC -ne 0 ]]; then
+	echo "dh binary failed (exit code $RC)."	1>&2
+	exit 1
+    fi
+
+    popd
+}
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+if [[ $DO_SOURCE -gt 0 ]]; then
+    do_source
+fi
+
+if [[ $DO_CLEAN -gt 0 ]]; then
+    if [[ -d "${MERGE_DIR}" ]]; then
+        do_clean
+    fi
+fi
+
+if [[ $DO_BUILD -gt 0 ]]; then
+    do_build
+fi
+
+if [[ $DO_INSTALL -gt 0 ]]; then
+    do_install
+fi
+
+if [[ $DO_PACKAGE -gt 0 ]]; then
+    do_package
+fi
+
