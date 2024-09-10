@@ -158,6 +158,9 @@ execute_after_dh_auto_install:
 #	cd debian/asterisk-modules/usr/lib/$(DEB_HOST_MULTIARCH)/asterisk/modules \
 #	&& rm -f $$extra_packs
 
+execute_after_dh_install:
+	$(RM) -f debian/asl3-asterisk-modules/usr/lib/${DEB_HOST_MULTIARCH}/asterisk/modules/test_*.so
+
 override_dh_installdocs:
 	dh_installdocs --all -- $(DOCS)
 
