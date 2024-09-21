@@ -44,7 +44,7 @@ jobs:
   make-packages:
     uses: AllStarLink/asl3-workflows/.github/workflows/ephemeral_ec2_run-this.yml@develop
     with:
-      run-this: ./builder/dockerbuild.sh -a ${{ inputs.arch  }} -o ${{ inputs.os }} --ast-ver ${{ inputs.ast-ver }} --rpt-ver ${{ inputs.rpt-ver }} --package-ver ${{ inputs.package-ver}} --gh-rel ${{ inputs.gh-rel }} ${{ (inputs.commit-versioning == 'yes' || (inputs.commit-versioning == 'default' && inputs.deployment-environment == 'development')) && '-r' || null }}
+      run-this: ./builder/dockerbuild.sh -a ${{ inputs.arch  }} -o ${{ inputs.os }} --ast-ver ${{ inputs.ast-ver }} --rpt-ver ${{ inputs.rpt-ver }} --package-ver ${{ inputs.package-ver}} --gh-rel ${{ inputs.gh-rel }} ${{ (inputs.commit-versioning == 'yes' || (inputs.commit-versioning == 'default' && inputs.deployment-environment == 'development')) && '-r' || null }} --repo ${{ inputs.aptly-repo }}
       arch: ${{ inputs.arch == 'armhf' && 'arm64' || inputs.arch == 'aarch64' && 'arm64' || inputs.arch == 'amd64' && 'x86_64' || inputs.arch == 'riscv64' && 'x86_64' || inputs.arch }}
       artifact-path: '/actions-runner/_work/asl3-asterisk/_debs/'
     secrets: inherit
