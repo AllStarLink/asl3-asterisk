@@ -48,6 +48,11 @@ while [[ $# -gt 0 ]]; do
 	  shift
 	  shift
 	  ;;
+	--repo)
+	  APLY_REPO="asl3-$2"
+	  shift
+      shift
+      ;;
     -*|--*|*)
       echo "Unknown option $1"
       exit 1
