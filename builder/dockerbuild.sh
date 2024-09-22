@@ -49,7 +49,7 @@ while [[ $# -gt 0 ]]; do
 	  shift
 	  ;;
 	--repo)
-	  APLY_REPO="asl3-$2"
+	  APTLY_REPO="asl3-$2"
 	  shift
       shift
       ;;
