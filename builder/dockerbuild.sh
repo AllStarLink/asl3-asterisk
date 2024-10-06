@@ -151,6 +151,8 @@ gh release upload -R AllStarLink/asl3-asterisk $GH_REL $ALL_PKG_ROOT/_debs/*.deb
 
 docker image rm --force $D_TAG
 
+APTLY_USER="${APTLY_API_USER}:${APTLY_API_PASS}"
+
 find $ALL_PKG_ROOT/_debs/*.deb -name "*.deb" | \
     xargs -I {} -d '\n' curl --fail --user ${APTLY_USER} \
     -X POST -F 'file=@"{}"' \
