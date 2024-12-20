@@ -11,5 +11,4 @@ config_c_fix_template_inheritance_overrides.patch
 config_c_fix_template_writing.patch
 config_c_fix_tryinclude.patch
 config_c_fix_whitespace.patch
-dns_round_robin.patch
 sounds_ulaw_default
