@@ -3,10 +3,10 @@
 1007_ffmpeg_detect.patch
 1008_ffmpeg_include.patch
 1009_build_reproducibly.patch
-2004_mgcp.patch
 2006_enable_test_framework.patch
 2008_disable_ilbc.patch
 2010_astdatadir.patch
+alsa_detect.patch
 config_c_fix_template_inheritance_overrides.patch
 config_c_fix_template_writing.patch
 config_c_fix_tryinclude.patch

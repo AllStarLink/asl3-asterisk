@@ -12,8 +12,8 @@ Usage: `build-asl3 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] ACTIONS`
 
 Options :
 
-* -a Asterisk version (default: installed (or latest) version, e.g. "20.9.2")
-* -v ASL/app\_rpt version (default: installed (or latest) version, e.g. "3.0.4")
+* -a Asterisk version (default: installed (or latest) version, e.g. "22.1.0")
+* -v ASL/app\_rpt version (default: installed (or latest) version, e.g. "3.3.0")
 * -r  Release version (default: installed (or latest) version, e.g. "1")
 * -d  local install directory (default: "/")
 * -l  Create merged source directory with symlinks
@@ -30,8 +30,8 @@ Note: specifying the "build", "install", or "package" actions will, if needed,
 create the merged source directory.
 
 Note: the Asterisk, ASL/app\_rpt, and Release versions will default to those
-of the "asl3-asterisk" package.  You can also use the "AST_VER", "RPT_VER",
-and "REL_VER" environment variables to specify the versions.
+of the "asl3-asterisk" package.  You can also use the "AST\_VER", "RPT\_VER",
+and "REL\_VER" environment variables to specify the versions.
 
 # DESCRIPTION
 
@@ -99,7 +99,7 @@ This one's easy.  To build the "asl3-asterisk-*" Debian packages you can use the
 ```
 git clone https://github.com/AllStarLink/asl3-asterisk.git  (if needed)
 cd asl3-asterisk
-./build-asl3 -a 20.9.2 -v 3.0.4 -r 1 source build package
+./build-asl3 -a 22.1.0 -v 3.3.0 -r 1 source build package
 ```
 
 Note: the `build-asl3` script is smart.  If the merged directory does not exist you can leave off the "source" and "build" actions (they will be automatically added).
@@ -114,18 +114,18 @@ The following is an example of how you might use the `build-asl3` command to mak
    git clone https://github.com/AllStarLink/asl3-asterisk.git
    ```
 
-2. Optionally, you can [pre-]fetch a copy of the "asterisk" project and checkout the "tag" of the version you wish to use.  If you skip this step (and that's OK) we will download a copy of the "asterisk" project.
+2. Optionally, you can [pre-]fetch a copy of the "asterisk" project and checkout the "tag" of the version you wish to use.  If you skip this step (and that's OK) we will download a copy of the "asterisk" project currently installed on your system.
    
    ```
    git clone https://github.com/asterisk/asterisk.git
-   (cd asterisk; git checkout 20.9.2)
+   (cd asterisk; git checkout 22.1.0)
    ```
 
-3. Optionally, you can [pre-]fetch a copy of the "app\_rpt" project.  As above, to work with a specific version of "app\_rpt" then checkout it's "tag".  If you skip this step (and that's OK) we will download a copy of the "app\_rpt" project.
+3. Optionally, you can [pre-]fetch a copy of the "app\_rpt" project.  As above, to work with a specific version of "app\_rpt" then checkout it's "tag".  If you skip this step (and that's OK) we will download a copy of the "app\_rpt" project currently installed on your system.
    
    ```
    git clone https://github.com/AllStarLink/app_rpt.git
-   (cd app_rpt; git checkout 3.0.4)     <-- optional, i
+   (cd app_rpt; git checkout 3.3.0)     <-- optional if you want the development sources
    ```
 
 4. Create (or update) the merged source directory.

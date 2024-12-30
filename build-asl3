@@ -28,8 +28,8 @@ usage()
 Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] ACTIONS 
 
 Options :
-  -a  Asterisk version        (e.g. 20.9.2)
-  -v  ASL/app_rpt version     (e.g. 3.0.4)
+  -a  Asterisk version        (e.g. 22.1.0)
+  -v  ASL/app_rpt version     (e.g. 3.3.0)
   -r  Release version         (e.g. 1)
   -d  local install directory (default: "/")
   -l  Create merged source directory with symlinks
@@ -172,13 +172,18 @@ done
 
 copy_path()
 {
-    if [[ $USE_SYMLINKS -ne 0 ]]; then
-	link_path "$1" "$2"
+    src_path="$1"
+    dst_path="$2"
+
+    if [[ ! -e "${src_path}" ]]; then
+	echo "info: not copying: $src_path"
 	return
     fi
 
-    src_path="$1"
-    dst_path="$2"
+    if [[ $USE_SYMLINKS -ne 0 ]]; then
+	link_path "${src_path}" "${dst_path}"
+	return
+    fi
 
     if [[ -f "$src_path" ]]; then
 	echo "Copy \"$src_path/$path\" --> \"$dst_path/$path\""
@@ -245,9 +250,10 @@ prepare_patched_files()
 {
     patch="$1"
 
+    echo "info: preparing to apply patch: $patch"
     for file in $(grep -E '^--- |^\+\+\+ ' $patch | cut -d' ' -f2 | sed 's|^a/||;s|^b/||' | sort -u); do
 	if [[ -L "$file" ]]; then
-	    echo "replacing symlink'd file: $file"
+	    echo "  replacing symlink'd file: $file"
 	    cp -p $file $file-ORIG
 	    mv $file-ORIG $file
 	fi
@@ -257,6 +263,11 @@ prepare_patched_files()
 apply_patch()
 {
     patch="$1"
+
+    if [[ ! -f "${patch}" ]]; then
+	echo "info: skipping patch: $patch"
+	return
+    fi
 
     if [[ $USE_SYMLINKS -ne 0 ]]; then
 	prepare_patched_files "${patch}"
@@ -277,6 +288,7 @@ revert_patch()
     patch="$1"
 
     if [[ ! -f "${patch}" ]]; then
+	echo "info: not reverting patch: $patch"
 	return
     fi
 
@@ -308,7 +320,7 @@ add_app_rpt()
     if [[ ! -d "${APP_RPT_DIR}" ]]; then
 	echo "Cloning \"app_rpt\""
 	git clone https://github.com/AllStarLink/app_rpt.git "${APP_RPT_DIR}"
-#	( cd "${APP_RPT_DIR}"; git checkout $RPT_VER )
+	( cd "${APP_RPT_DIR}"; git checkout $RPT_VER )
     fi
 }
 
@@ -337,14 +349,24 @@ merge_app_rpt()
 {
     if [[ -d "${MERGE_DIR}" ]]; then
 	pushd "${MERGE_DIR}"
-	revert_patch Makefiles.diff
+	if [ -f Makefiles.diff ]; then
+	    # if app_rpt <= 3.2.x, Asterisk <= 20.x.x
+	    revert_patch Makefiles.diff
+	else
+	    # if app_rpt >= 3.3.x, Asterisk > 20.x.x
+	    revert_patch apps/Makefile.diff
+	    revert_patch channels/Makefile.diff
+	fi
 	revert_patch res/Makefile.diff
 	revert_patch utils/Makefile.diff
 	popd
     fi
 
     pushd "${APP_RPT_DIR}"
-    copy_path "Makefiles.diff"		"${MERGE_DIR}/Makefiles.diff"
+    if [ -f Makefiles.diff ]; then
+	# if Asterisk 20
+	copy_path "Makefiles.diff"	"${MERGE_DIR}/Makefiles.diff"
+    fi
     copy_path "apps"			"${MERGE_DIR}/apps"
     copy_path "channels"		"${MERGE_DIR}/channels"
     copy_path "configs/rpt"		"${MERGE_DIR}/configs/asl3"
@@ -354,7 +376,14 @@ merge_app_rpt()
     popd
 
     pushd "${MERGE_DIR}"
-    apply_patch Makefiles.diff
+    if [ -f Makefiles.diff ]; then
+	# if app_rpt <= 3.2.x, Asterisk <= 20.x.x
+	apply_patch Makefiles.diff
+    else
+	# if app_rpt >= 3.3.x, Asterisk > 20.x.x
+	apply_patch apps/Makefile.diff
+	apply_patch channels/Makefile.diff
+    fi
     apply_patch res/Makefile.diff
     apply_patch utils/Makefile.diff
     popd
@@ -408,7 +437,9 @@ create_build_directory()
     echo "Add version"
     rm -rf .version
     echo "${VSTR}" > .version
-    ( cd ChangeLogs && ln -f -s ChangeLog-${AST_VER}.md ChangeLog-${VSTR}.md5 )
+    if [[ -d ChangeLogs ]]; then
+	( cd ChangeLogs && ln -f -s ChangeLog-${AST_VER}.md ChangeLog-${VSTR}.md5 )
+    fi
     rm debian/changelog
     debchange				\
 	--create			\
