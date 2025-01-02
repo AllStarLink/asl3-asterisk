@@ -67,28 +67,32 @@ case "$1" in
 	fi
 
 	# cleanup /var/lib/asterisk/sounds
-	if [ -d /var/lib/asterisk/sounds/en ]; then
-		echo "cleaning up /var/lib/asterisk/sounds/en -> /usr/local/share/asterisk/sounds"
-		mv /var/lib/asterisk/sounds/en/* /usr/local/share/asterisk/sounds/
-		rm -r /var/lib/asterisk/sounds/en
-	fi
-
-	if [ -d /var/lib/asterisk/sounds/custom ]; then
-		echo "cleaning up /var/lib/asterisk/sounds/custom -> /usr/local/share/asterisk/sounds"
-		mv /var/lib/asterisk/sounds/custom/* /usr/local/share/asterisk/sounds/
-		rm -r /var/lib/asterisk/sounds/custom
-	fi
-
-	for d in `find /var/lib/asterisk/sounds -type d`
-	do
-		mv $d /usr/local/share/asterisk/sounds/
-	done
-
 	if [ -d /var/lib/asterisk/sounds ]; then
-		rm -r /var/lib/asterisk/sounds
+		if [ -d /var/lib/asterisk/sounds/en ]; then
+			echo "cleaning up /var/lib/asterisk/sounds/en -> /usr/local/share/asterisk/sounds"
+			mv /var/lib/asterisk/sounds/en/* /usr/local/share/asterisk/sounds/
+			rm -r /var/lib/asterisk/sounds/en
+		fi
+	
+		if [ -d /var/lib/asterisk/sounds/custom ]; then
+			echo "cleaning up /var/lib/asterisk/sounds/custom -> /usr/local/share/asterisk/sounds"
+			mv /var/lib/asterisk/sounds/custom/* /usr/local/share/asterisk/sounds/
+			rm -r /var/lib/asterisk/sounds/custom
+		fi
+	
+		for d in `find /var/lib/asterisk/sounds -type d`
+		do
+			mv $d /usr/local/share/asterisk/sounds/
+		done
+	
+		if [ -d /var/lib/asterisk/sounds ]; then
+			rm -r /var/lib/asterisk/sounds
+		fi
 	fi
 
-	if [ ! -h /var/lib/asterisk/sounds ]; then
+	# If /var/lib/asterisk/sounds doesn't exist as a symlink
+	# make it so
+	if [ ! -e /var/lib/asterisk/sounds ]; then
 		ln -s /usr/local/share/asterisk/sounds /var/lib/asterisk/sounds
 	fi
 
