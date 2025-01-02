@@ -1,0 +1,13 @@
+diff --git a/configs/samples/asterisk.conf.sample b/configs/samples/asterisk.conf.sample
+index f7b5bae980..844a058eaf 100644
+--- a/configs/samples/asterisk.conf.sample
++++ b/configs/samples/asterisk.conf.sample
+@@ -128,7 +128,7 @@ documentation_language = en_US	; Set the language you want documentation
+                 ; housekeeping AMI and ARI channel events.  This can
+                 ; reduce the load on the manager and ARI applications
+                 ; when the Digium Phone Module for Asterisk is in use.
+-;sounds_search_custom_dir = no;  This option, if enabled, will
++sounds_search_custom_dir = yes;  This option, if enabled, will
+                 ; cause Asterisk to search for sounds files in
+                 ; AST_DATA_DIR/sounds/custom before searching the
+                 ; normal directories like AST_DATA_DIR/sounds/<lang>.

@@ -10,3 +10,4 @@
 config_c_fix_template_inheritance_overrides.patch
 config_c_fix_template_writing.patch
 sounds_ulaw_default
+enable_custom_sounddir.patch
