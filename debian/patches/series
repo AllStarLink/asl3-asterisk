@@ -12,3 +12,4 @@ config_c_fix_template_writing.patch
 config_c_fix_tryinclude.patch
 config_c_fix_whitespace.patch
 sounds_ulaw_default
+enable_custom_sounddir.patch

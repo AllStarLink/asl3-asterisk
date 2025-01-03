@@ -29,6 +29,11 @@ case "$1" in
 			2>/dev/null
 	done
 
+	# make sure that custom sounds are enabled
+	# https://github.com/AllStarLink/asl3-asterisk/issues/34
+	perl -pi -e 's/^;sounds_search_custom_dir\s+=\s+no/sounds_search_custom_dir = yes/g' \
+		/etc/asterisk/asterisk.conf
+
 	set -e
     ;;
 
