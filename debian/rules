@@ -50,11 +50,16 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	INSTALL_PROGRAM += -s
 endif
 
-ADDONS_ENABLE = app_macro 
+ADDONS_ENABLE =
+ADDONS_ENABLE += aelparse
+ADDONS_ENABLE += chan_mobile
+ADDONS_ENABLE += chan_ooh323
+ADDONS_ENABLE += format_mp3
 ADDONS_ENABLE += res_config_mysql
-ADDONS_ENABLE += chan_mobile chan_ooh323 chan_sip
-ADDONS_ENABLE += aelparse format_mp3 smsq TEST_FRAMEWORK
+ADDONS_ENABLE += smsq
+
 ADDONS_DISABLE = BUILD_NATIVE
+
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
 ADDONS_ENABLE += BETTER_BACKTRACES DEBUG_THREADS
 endif

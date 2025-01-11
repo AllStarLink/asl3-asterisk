@@ -12,7 +12,7 @@ This structure is forked from the Debian project's
 Asterisk build environment located at
 https://salsa.debian.org/pkg-voip-team/asterisk.
 
-This repository is structure to track the Asterisk 20 LTS
+This repository is structured to track the Asterisk 22 LTS
 release from the Asterisk project.
 
 In general, this repo is used exclsively for the AllStarLink
