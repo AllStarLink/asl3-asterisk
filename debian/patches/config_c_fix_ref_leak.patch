@@ -1,0 +1,32 @@
+diff --git a/main/config.c b/main/config.c
+index 4f575046eed..251c33be19b 100644
+--- a/main/config.c
++++ b/main/config.c
+@@ -2749,13 +2749,6 @@ int ast_config_text_file_save2(const char *configfile, const struct ast_config *
+ 	struct ao2_container *fileset;
+ 	struct inclfile *fi;
+ 
+-	fileset = ao2_container_alloc_hash(AO2_ALLOC_OPT_LOCK_MUTEX, 0, 1023,
+-		hash_string, NULL, hashtab_compare_strings);
+-	if (!fileset) {
+-		/* Container creation failed. */
+-		return -1;
+-	}
+-
+ 	/* Check all the files for write access before attempting to modify any of them */
+ 	for (incl = cfg->includes; incl; incl = incl->next) {
+ 		/* reset all the output flags in case this isn't our first time saving this data */
+@@ -2777,6 +2770,13 @@ int ast_config_text_file_save2(const char *configfile, const struct ast_config *
+ 		return -1;
+ 	}
+ 
++	fileset = ao2_container_alloc_hash(AO2_ALLOC_OPT_LOCK_MUTEX, 0, 1023,
++		hash_string, NULL, hashtab_compare_strings);
++	if (!fileset) {
++		/* Container creation failed. */
++		return -1;
++	}
++
+ 	/* Now that we know we have write access to all files, it's safe to start truncating them */
+ 
+ 	/* go thru all the inclusions and make sure all the files involved (configfile plus all its inclusions)
