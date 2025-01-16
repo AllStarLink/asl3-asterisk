@@ -6,7 +6,7 @@ on:
       ast-ver:
         description: 'Asterisk LTS Version Base'
         type: string
-        default: '22.1.0'
+        default: '22.2.0'
         required: true
       rpt-ver:
         description: 'app_rpt Version Tag'

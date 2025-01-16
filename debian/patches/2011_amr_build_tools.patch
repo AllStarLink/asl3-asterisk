@@ -10,8 +10,7 @@ Last-Update: 2023-08-27
 This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 --- a/build_tools/menuselect-deps.in
 +++ b/build_tools/menuselect-deps.in
-@@ -1,4 +1,7 @@
- ALSA=@PBX_ALSA@
+@@ -1,3 +1,6 @@
 +AMR_NB=@PBX_AMR_NB@
 +AMR_WB_DECODER=@PBX_AMR_WB_DECODER@
 +AMR_WB_ENCODER=@PBX_AMR_WB_ENCODER@
@@ -20,19 +19,19 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  COROSYNC=@PBX_COROSYNC@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -522,6 +522,9 @@
+@@ -530,6 +530,9 @@
+ # by the --with option name (the third field),
  # to make things easier for the users.
  
- AST_EXT_LIB_SETUP([ALSA], [Advanced Linux Sound Architecture], [asound])
 +AST_EXT_LIB_SETUP([AMR_NB], [AMR Audio Codec (Narrowband) Decoder/Encoder], [opencore-amrnb])
 +AST_EXT_LIB_SETUP([AMR_WB_DECODER], [AMR-WB Audio Codec (Wideband) Decoder], [opencore-amrwb])
 +AST_EXT_LIB_SETUP([AMR_WB_ENCODER], [AMR-WB Audio Codec (Wideband) Encoder], [vo-amrwbenc])
  AST_EXT_LIB_SETUP([BFD], [Debug symbol decoding], [bfd])
  
  # BKTR is used for backtrace support on platforms that do not
-@@ -1616,6 +1619,10 @@
+@@ -1630,6 +1633,10 @@
  
- AST_EXT_LIB_CHECK([ALSA], [asound], [snd_pcm_open], [alsa/asoundlib.h])
+ # do the package library checks now
  
 +AST_EXT_LIB_CHECK([AMR_NB], [opencore-amrnb], [Encoder_Interface_init], [opencore-amrnb/interf_enc.h])
 +AST_EXT_LIB_CHECK([AMR_WB_DECODER], [opencore-amrwb], [D_IF_init], [opencore-amrwb/dec_if.h])
@@ -43,9 +42,9 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  AST_EXT_LIB_CHECK([BFD], [bfd], [bfd_openr], [bfd.h], [-ldl -liberty])
 --- a/makeopts.in
 +++ b/makeopts.in
-@@ -133,6 +133,13 @@
- ALSA_INCLUDE=@ALSA_INCLUDE@
- ALSA_LIB=@ALSA_LIB@
+@@ -130,6 +130,13 @@
+ AST_RPATH=@AST_RPATH@
+ AST_FORTIFY_SOURCE=@AST_FORTIFY_SOURCE@
  
 +AMR_NB_INCLUDE=@AMR_NB_INCLUDE@
 +AMR_NB_LIB=@AMR_NB_LIB@

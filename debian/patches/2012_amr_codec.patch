@@ -29,7 +29,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
   * \retval 0 success
 --- a/main/codec_builtin.c
 +++ b/main/codec_builtin.c
-@@ -898,6 +898,54 @@
+@@ -925,6 +925,54 @@
  	.samples_count = silk_samples
  };
  
@@ -84,7 +84,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  #define CODEC_REGISTER_AND_CACHE(codec) \
  	({ \
  		int __res_ ## __LINE__ = 0; \
-@@ -930,6 +978,9 @@
+@@ -957,6 +1005,9 @@
  {
  	int res = 0;
  
@@ -136,7 +136,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  	} else if (!strcmp(name, "png")) {
 --- a/main/rtp_engine.c
 +++ b/main/rtp_engine.c
-@@ -3721,6 +3721,9 @@
+@@ -3906,6 +3906,9 @@
  	set_next_mime_type(ast_format_vp8, 0,  "video", "VP8", 90000);
  	set_next_mime_type(ast_format_vp9, 0, "video", "VP9", 90000);
  
@@ -146,7 +146,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  	/* Define the static rtp payload mappings */
  	add_static_payload(0, ast_format_ulaw, 0);
  	#ifdef USE_DEPRECATED_G726
-@@ -3764,6 +3767,9 @@
+@@ -3949,6 +3952,9 @@
  	add_static_payload(109, ast_format_h265, 0);
  
  	add_static_payload(110, ast_format_speex, 0);

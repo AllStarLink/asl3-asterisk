@@ -7,7 +7,7 @@ include /usr/share/dpkg/pkg-info.mk
 include /usr/share/dpkg/architecture.mk
 
 # generate documentation unless nodoc requested
-#CHANGELOGS_stem = ChangeLogs/ChangeLog-$(DEB_VERSION_UPSTREAM)
+#CHANGELOGS_stem = ChangeLogs/ChangeLog-$(firstword $(subst ~, ,$(subst ~~,-,$(DEB_VERSION_UPSTREAM))))
 DOCS_stem = README SECURITY
 ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
 #CHANGELOGS = $(CHANGELOGS_stem:=.html) $(CHANGELOGS_stem:=.txt)
@@ -123,7 +123,7 @@ override_dh_gencontrol:
 		| sed -e 's/.\+ "\(.\+\)\"/\1/g'); \
 		dh_gencontrol -- -Vasterisk:ABI=$$AST_BUILDOPT_SUM
 
-REMOVED_PROTO_CONFS = dundi mgcp skinny unistim
+REMOVED_PROTO_CONFS = dundi unistim
 REMOVED_PROTO_FILES = $(REMOVED_PROTO_CONFS:%=debian/tmp/etc/asterisk/%.conf)
 SUBPACKS_EXTRA = Dooh323 mysql mp3
 ifeq (linux,$(DEB_BUILD_ARCH_OS))

@@ -14,7 +14,7 @@
 #2014_pjproject_unbreak.patch
 #2015_opus.patch
 #2016_opus_plc.patch
-alsa_detect.patch
+#alsa_detect.patch
 config_c_fix_template_inheritance_overrides.patch
 config_c_fix_template_writing.patch
 #config_c_fix_ref_leak.patch

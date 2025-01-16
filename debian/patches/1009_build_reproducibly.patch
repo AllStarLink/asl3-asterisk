@@ -20,3 +20,14 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  cat << END
  /*
   * build.h
+--- a/build_tools/make_xml_documentation
++++ b/build_tools/make_xml_documentation
+@@ -193,7 +193,7 @@
+ for subdir in ${mod_subdirs} ; do
+ 	printf "%s " "${subdir}"
+ 	subdir_path=$(make_absolute "$subdir")
+-	for i in $(${FIND} "${subdir_path}" -name '*.c' -or -name '*.cc'); do
++	for i in $(${FIND} "${subdir_path}" -name '*.c' -or -name '*.cc' | LC_ALL=C sort); do
+ 		if [ "${with_moduleinfo}" -eq "1" ] ; then
+ 			MODULEINFO=$(${AWK} -f "${source_tree}/build_tools/get_moduleinfo" "${i}")
+ 			if [ "${MODULEINFO}" != "" ] ; then
