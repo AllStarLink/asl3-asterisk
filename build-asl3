@@ -28,7 +28,7 @@ usage()
 Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] ACTIONS 
 
 Options :
-  -a  Asterisk version        (e.g. 22.1.0)
+  -a  Asterisk version        (e.g. 22.2.0)
   -v  ASL/app_rpt version     (e.g. 3.3.0)
   -r  Release version         (e.g. 1)
   -d  local install directory (default: "/")
@@ -119,7 +119,7 @@ if [[ $# -eq 0 ]]; then
     usage
 fi
 
-while [ $# -gt 0 ]; do
+while [[ $# -gt 0 ]]; do
     case "${1}" in
     "source" )
 	DO_SOURCE=1
@@ -168,6 +168,15 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+case "${AST_VER}" in
+    20.* )
+	QUILT_SERIES="debian/patches/series.v20"
+	;;
+    * )
+	QUILT_SERIES="debian/patches/series"
+	;;
+esac
+
 # ---------- ---------- ---------- ---------- ---------- ----------
 
 copy_path()
@@ -201,7 +210,7 @@ copy_path()
 		fi
 	    elif [[ -f "$src_path/$path" ]]; then
 		if [[ -f "$dst_path/$path" ]]; then
-		    if [ "$(stat -c %Y "$src_path/$path")" -gt "$(stat -c %Y "$dst_path/$path")" ]; then
+		    if [[ "$(stat -c %Y "$src_path/$path")" -gt "$(stat -c %Y "$dst_path/$path")" ]]; then
 			echo "Update \"$src_path/$path\" --> \"$dst_path/$path\""
 			cp -p "$src_path/$path" "$dst_path/$path"
 		    fi
@@ -228,7 +237,11 @@ link_path()
     if [[ -f "$src_path" ]]; then
 	path=$(basename $src_path)
 	rel_dir=$(realpath --relative-to="$(dirname "$dst_path")" "$(dirname $src_path)")
-	ln -f -s "$rel_dir/$path" "$dst_path"
+	if [[ ! -e "$dst_path" || -L "$dst_path" ]]; then
+	    ln -f -s "$rel_dir/$path" "$dst_path"
+	else
+	    echo "  Not replacing \"$dst_path\""
+	fi
     else
 	mkdir -p "${dst_path}"
 	( cd "$src_path" ; find . -mindepth 1 -path ".git" -prune -o -print )	\
@@ -238,7 +251,11 @@ link_path()
 	    if [[ -d "$src_path/$path" ]]; then
 		mkdir -p "$dst_path/$path"
 	    else
-		ln -f -s "$rel_dir/$path" "$dst_path/$path"
+		if [[ ! -e "$dst_path/$path" || -L "$dst_path/$path" ]]; then
+		    ln -f -s "$rel_dir/$path" "$dst_path/$path"
+		else
+		    echo "  Not replacing \"$dst_path/$path\""
+		fi
 	    fi
         done
     fi
@@ -278,7 +295,10 @@ apply_patch()
 
 prepare_patch_series()
 {
-    for patch in $(cat debian/patches/series); do
+    for patch in $(cat ${QUILT_SERIES}); do
+	if [[ $patch =~ ^# ]]; then 
+	    continue
+	fi
 	prepare_patched_files "debian/patches/$patch"
     done
 }
@@ -287,15 +307,15 @@ revert_patch()
 {
     patch="$1"
 
-    if [[ ! -f "${patch}" ]]; then
-	echo "info: not reverting patch: $patch"
+    if [[ ! -r "${patch}" ]]; then
+	#echo "info: not reverting patch: $patch"
 	return
     fi
 
     # check that all of the files being updated are regular files (and not symlinks)
     for file in $(grep -E '^--- |^\+\+\+ ' $patch | cut -d' ' -f2 | sed 's|^a/||;s|^b/||' | sort -u); do
-	if [[ -L "$file" ]]; then
-	    echo "not reverting patch: $patch (can't patch a symlink: $file)"
+	if [[ ! -f $file || -L $file ]]; then
+	    echo "not reverting patch: $patch (expecting file: $file)"
 	    return
 	fi
     done
@@ -349,7 +369,7 @@ merge_app_rpt()
 {
     if [[ -d "${MERGE_DIR}" ]]; then
 	pushd "${MERGE_DIR}"
-	if [ -f Makefiles.diff ]; then
+	if [[ -r Makefiles.diff ]]; then
 	    # if app_rpt <= 3.2.x, Asterisk <= 20.x.x
 	    revert_patch Makefiles.diff
 	else
@@ -363,9 +383,12 @@ merge_app_rpt()
     fi
 
     pushd "${APP_RPT_DIR}"
-    if [ -f Makefiles.diff ]; then
-	# if Asterisk 20
+    if [[ -f Makefiles.diff ]]; then
+	# if Asterisk 20 (and we have already pulled the [old] Makefiles.diff)
 	copy_path "Makefiles.diff"	"${MERGE_DIR}/Makefiles.diff"
+    elif [[ "${AST_VER}" =~ 20.* && ! -f "${MERGE_DIR}/Makefiles.diff" ]]; then
+	# if Asterisk 20.x.x with a newer app_rpt
+	(cd "${MERGE_DIR}"; wget https://github.com/AllStarLink/app_rpt/raw/refs/heads/3.2.0/Makefiles.diff )
     fi
     copy_path "apps"			"${MERGE_DIR}/apps"
     copy_path "channels"		"${MERGE_DIR}/channels"
@@ -376,7 +399,7 @@ merge_app_rpt()
     popd
 
     pushd "${MERGE_DIR}"
-    if [ -f Makefiles.diff ]; then
+    if [[ -f Makefiles.diff ]]; then
 	# if app_rpt <= 3.2.x, Asterisk <= 20.x.x
 	apply_patch Makefiles.diff
     else
@@ -434,6 +457,13 @@ create_build_directory()
 
     pushd "${MERGE_DIR}"
 
+    if [[ "$QUILT_SERIES" != "debian/patches/series" ]]; then
+	echo "Select patch series ($QUILT_SERIES)"
+	DPKG_VENDOR=$(dpkg-vendor --query vendor | tr '[:upper:]' '[:lower:]')
+	DPKG_SERIES=$(basename $QUILT_SERIES)
+	ln -f -s ${DPKG_SERIES} debian/patches/${DPKG_VENDOR}.series
+    fi
+
     echo "Add version"
     rm -rf .version
     echo "${VSTR}" > .version
@@ -452,11 +482,11 @@ create_build_directory()
 	""
 
     if [[ $USE_SYMLINKS -ne 0 ]]; then
-	echo "Prepare to-be-patched files"
+	echo "Prepare to-be-patched files (from $QUILT_SERIES)"
 	prepare_patch_series
     fi
 
-    echo "Prepare source for building, apply patches"
+    echo "Prepare source for building, apply patches (from $QUILT_SERIES)"
     dpkg-source --before-build .
     touch .BEFORE-BUILD-APPLIED
 

@@ -95,7 +95,7 @@ Copyright:
   2012, 2015        Matt Jordan <mjordan@digium.com>
   2022              Michael Kuron
   2005              Mikael Magnusson <mikma@users.sourceforge.net>
-  2021-2022         Naveen Albert <asterisk@phreaknet.org>
+  2021-2022, 2024   Naveen Albert <asterisk@phreaknet.org>
   1999-2006         Oleksiy Krivoshey <oleksiyk@gmail.com>
   2005, 2009        Olle E. Johansson <oej@edvina.net>
   2005              Oxymium sarl
@@ -108,7 +108,7 @@ Copyright:
   2008              Roberto Casas <roberto.casas@diaple.com>
   1999-2006         Russell Bryant <russelb@clemson.edu>
   2005-2008, 2012   Russell Bryant <russell@digium.com>
-  2019-2022         Sangoma Technologies Corporation
+  2019-2023         Sangoma Technologies Corporation
   2014              Schmooze Com, Inc.
   2008, 2017, 2020  Sean Bright <sean.bright@gmail.com>
   2006              Sergey Basmanov <sergey_basmanov@mail.ru>
@@ -309,10 +309,9 @@ License: BSD-3-Clause
 
 Files:
  contrib/scripts/live_ast
- contrib/scripts/sip_nat_settings
  menuselect/contrib/menuselect-dummy
 Copyright:
-  2005, 2007-2008  Tzafrir Cohen <tzafrir.cohen@xorcom.com>
+  2007-2008  Tzafrir Cohen <tzafrir.cohen@xorcom.com>
 License: GPL-2+
 
 Files:
@@ -714,7 +713,7 @@ Comment:
 
 Files: debian/*
 Copyright:
-  2016, 2023  Jonas Smedegaard <dr@jones.dk>
+  2016, 2022-2024  Jonas Smedegaard <dr@jones.dk>
 License-Grant:
  This packaging is free software;
  you can redistribute it and/or modify it

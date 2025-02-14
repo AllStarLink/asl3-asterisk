@@ -14,7 +14,7 @@ Last-Update: 2022-01-22
 This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 --- a/configure.ac
 +++ b/configure.ac
-@@ -534,7 +534,7 @@
+@@ -542,7 +542,7 @@
  AST_EXT_LIB_SETUP_OPTIONAL([COROSYNC_CFG_STATE_TRACK], [A callback only in corosync 1.x], [COROSYNC], [cfg])
  AST_EXT_LIB_SETUP([CRYPT], [password and data encryption], [crypt])
  AST_EXT_LIB_SETUP([DAHDI], [DAHDI], [dahdi])
@@ -23,7 +23,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  AST_EXT_LIB_SETUP([GSM], [External GSM], [gsm], [, use 'internal' GSM otherwise])
  AST_EXT_LIB_SETUP([ILBC], [System iLBC], [ilbc], [, use 'internal' iLBC otherwise])
  AST_EXT_LIB_SETUP([GTK2], [gtk2], [gtk2])
-@@ -2801,7 +2801,18 @@
+@@ -2810,7 +2810,18 @@
  
  AST_EXT_TOOL_CHECK([SDL], [sdl-config])
  AST_EXT_LIB_CHECK([SDL_IMAGE], [SDL_image], [IMG_Load], [SDL_image.h], [${SDL_LIB}], [${SDL_INCLUDE}])

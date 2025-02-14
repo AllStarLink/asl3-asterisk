@@ -17,19 +17,19 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  OPUS=@PBX_OPUS@
 +OPUSENC=@PBX_OPUSENC@
  OPUSFILE=@PBX_OPUSFILE@
- OSPTK=@PBX_OSPTK@
  PGSQL=@PBX_PGSQL@
+ PJPROJECT=@PBX_PJPROJECT@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -570,6 +570,7 @@
+@@ -579,6 +579,7 @@
  AST_EXT_LIB_SETUP([OGG], [OGG], [ogg])
  AST_EXT_LIB_SETUP([OPENR2], [MFR2], [openr2])
  AST_EXT_LIB_SETUP([OPUS], [Opus], [opus])
 +AST_EXT_LIB_SETUP([OPUSENC], [Opusenc], [opusenc])
  AST_EXT_LIB_SETUP([OPUSFILE], [Opusfile], [opusfile])
- AST_EXT_LIB_SETUP([OSPTK], [OSP Toolkit], [osptk])
  AST_EXT_LIB_SETUP([PGSQL], [PostgreSQL], [postgres])
-@@ -2607,6 +2608,7 @@
+ AST_EXT_LIB_SETUP([BEANSTALK], [Beanstalk Job Queue], [beanstalk])
+@@ -2624,6 +2625,7 @@
  if test -z "$__opus_include" -o x"$__opus_include" = x" " ; then
  	__opus_include=-I/usr/include/opus
  fi
@@ -39,7 +39,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  for ver in ${LUA_VERSIONS:-5.4 5.3 5.2 5.1}; do
 --- a/makeopts.in
 +++ b/makeopts.in
-@@ -228,6 +228,9 @@
+@@ -230,6 +230,9 @@
  OPUS_INCLUDE=@OPUS_INCLUDE@
  OPUS_LIB=@OPUS_LIB@
  

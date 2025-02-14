@@ -248,14 +248,12 @@ Extra Channels
 ==============
 This package includes and enables by default a number of rather not so
 popular protocols. Having them enabled by default means that any
-security volnurability in them (such as CVE-2017-17090 / AST-2017-013 in
-chan_skinny) may open your system to attacks for no good reason.
+security volnurability in them may open your system to attacks
+for no good reason.
 
 Thus the following configuration files have been removed from the default
 set of configuration files installed to /etc/asterisk:
 * dundi.conf (DUNDi call routing, UDP port 4520)
-* mgcp.conf (chan_mgcp: MGCP voip protocol, UDP port 2727)
-* skinny.conf (chan_skinny: SCCP voip protocol, TCP port 2000)
 * unistim.conf (chan_unistim: UNISTIM voip protocol, UDP port 5000)
 
 If you do need any of those protocols, copy the sample file from

@@ -12,7 +12,7 @@ Usage: `build-asl3 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] ACTIONS`
 
 Options :
 
-* -a Asterisk version (default: installed (or latest) version, e.g. "22.1.0")
+* -a Asterisk version (default: installed (or latest) version, e.g. "22.2.0")
 * -v ASL/app\_rpt version (default: installed (or latest) version, e.g. "3.3.0")
 * -r  Release version (default: installed (or latest) version, e.g. "1")
 * -d  local install directory (default: "/")
@@ -99,7 +99,7 @@ This one's easy.  To build the "asl3-asterisk-*" Debian packages you can use the
 ```
 git clone https://github.com/AllStarLink/asl3-asterisk.git  (if needed)
 cd asl3-asterisk
-./build-asl3 -a 22.1.0 -v 3.3.0 -r 1 source build package
+./build-asl3 -a 22.2.0 -v 3.3.0 -r 1 source build package
 ```
 
 Note: the `build-asl3` script is smart.  If the merged directory does not exist you can leave off the "source" and "build" actions (they will be automatically added).
@@ -118,7 +118,7 @@ The following is an example of how you might use the `build-asl3` command to mak
    
    ```
    git clone https://github.com/asterisk/asterisk.git
-   (cd asterisk; git checkout 22.1.0)
+   (cd asterisk; git checkout 22.2.0)
    ```
 
 3. Optionally, you can [pre-]fetch a copy of the "app\_rpt" project.  As above, to work with a specific version of "app\_rpt" then checkout it's "tag".  If you skip this step (and that's OK) we will download a copy of the "app\_rpt" project currently installed on your system.

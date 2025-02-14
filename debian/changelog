@@ -1,3 +1,154 @@
+asterisk (1:22.1.1~dfsg+~cs6.14.60671435-1) unstable; urgency=medium
+
+  [ upstream ]
+  * new release
+    + Restrict ListCategories to the configuration directory;
+      CVE-2024-53566
+
+  [ Jonas Smedegaard ]
+  * update git-buildpackage config:
+    + avoid variable abstraction in usage comment
+
+ -- Jonas Smedegaard <dr@jones.dk>  Mon, 13 Jan 2025 00:01:35 +0100
+
+asterisk (1:22.1.0~dfsg+~cs6.14.60671435-1) unstable; urgency=medium
+
+  [ upstream ]
+  * new release
+
+  [ Jonas Smedegaard ]
+  * update and trust only upstream team signing key 5D984BE337191CE7
+  * update copyright info: update coverage
+
+ -- Jonas Smedegaard <dr@jones.dk>  Wed, 27 Nov 2024 12:37:42 +0100
+
+asterisk (1:22.0.0~dfsg+~cs6.14.60671435-1) unstable; urgency=medium
+
+  [ upstream ]
+  * new release
+
+ -- Jonas Smedegaard <dr@jones.dk>  Wed, 23 Oct 2024 13:39:34 +0200
+
+asterisk (1:22.0.0~~rc2~dfsg+~cs6.14.60671435-1) experimental; urgency=medium
+
+  [ upstream ]
+  * new prerelease(s)
+
+  [ Jonas Smedegaard ]
+  * update and unfuzz patches
+  * adapt build routines and add NEWS entry
+    related to no longer provided modules app_macro chan_sip
+  * stop build-depend on libasound2-dev;
+    stop mention ALSA in long description
+    (module chan_alsa not provided for some time)
+  * update copyright info: update coverage
+  * cleanup new upstream hint file .lastclean
+  * fix handle prerelease changelog file
+
+ -- Jonas Smedegaard <dr@jones.dk>  Sat, 05 Oct 2024 11:28:05 +0200
+
+asterisk (1:20.9.3~dfsg+~cs6.14.60671435-1) unstable; urgency=high
+
+  [ upstream ]
+  * new release(s)
+    + add entries to Originate blacklist;
+      CVE-2024-42365;
+      closes: bug#1078574, thanks to Salvatore Bonaccorso
+    + test for NULL ub_result in unbound_resolver_callback;
+      CVE-2024-42491
+
+  [ Jonas Smedegaard ]
+  * fix minor privilege escalation; thanks to Niels Galjaard
+  * update watch file: track mp3 component from git clone
+  * unfuzz patch 2012
+  * set urgency=high due to security-related bugfixes
+
+ -- Jonas Smedegaard <dr@jones.dk>  Sat, 07 Sep 2024 22:14:21 +0200
+
+asterisk (1:20.8.1~dfsg+~cs6.14.40431414-1) unstable; urgency=medium
+
+  [ upstream ]
+  * new release
+    + use PJProject 2.14.1,
+      which fixes Use-after-free in SRTP media transport;
+      CVE-2023-37457 CVE-2023-38703;
+      closes: bug#1059303, thanks to Moritz Mühlenhoff
+    + fix regression issues with DTLS client check;
+      closes: bug#1068296, thanks to Oleksandr Kozmenko
+
+  [ Jonas Smedegaard ]
+  * update watch file:
+    + track only LTS releases
+    + bump to track pjproject 2.14.1
+  * unfuzz patches
+  * update copyright info: update coverage
+  * declare compliance with Debian Policy 4.7.0
+  * create and restrict access to cache dir;
+    closes: bug#1072739, thanks to Bastian Triller
+  * fix rotate main logfiles,
+    as logfiles use suffix .log since Asterisk 19;
+    thanks to James Bottomley (see bug#1024822)
+
+ -- Jonas Smedegaard <dr@jones.dk>  Fri, 07 Jun 2024 14:10:19 +0200
+
+asterisk (1:20.6.0~dfsg+~cs6.13.40431414-2) unstable; urgency=medium
+
+  * update patch 2016 to avoid excessive logging;
+    closes: bug#1060275, thanks to Daniel
+
+ -- Jonas Smedegaard <dr@jones.dk>  Tue, 30 Jan 2024 11:42:08 +0100
+
+asterisk (1:20.6.0~dfsg+~cs6.13.40431414-1) unstable; urgency=medium
+
+  [ upstream ]
+  * new release
+
+  [ Jonas Smedegaard ]
+  * unfuzz patches
+  * update copyright info: update coverage
+  * build-depend on libjwt-dev
+
+ -- Jonas Smedegaard <dr@jones.dk>  Fri, 26 Jan 2024 14:53:47 +0100
+
+asterisk (1:20.5.2~dfsg+~cs6.13.40431414-1) unstable; urgency=medium
+
+  [ upstream ]
+  * new release
+
+  [ Jonas Smedegaard ]
+  * use systemd.pc to place systemd service unit;
+    build-depend on systemd-dev;
+    closes: bug#1059180, thanks to Chris Hofstaedtler
+
+ -- Jonas Smedegaard <dr@jones.dk>  Fri, 22 Dec 2023 13:58:28 +0100
+
+asterisk (1:20.5.1~dfsg+~cs6.13.40431414-1) unstable; urgency=high
+
+  [ upstream ]
+  * new release
+    + fixes these upstream bugs:
+      CVE-2023-49294 CVE-2023-49786;
+      closes: bug#1059032, #1059033, thanks to Salvatore Bonaccorso
+
+  [ Jonas Smedegaard ]
+  * fix enable opus codec;
+    build-depend on libopusenc-dev;
+    closes: bug#1025165,
+    thanks to Paweł Bogusławski, Faidon Liambotis and Athos Ribeiro
+  * set urgency=high due to multiple security bugfixes
+
+ -- Jonas Smedegaard <dr@jones.dk>  Tue, 19 Dec 2023 17:38:11 +0100
+
+asterisk (1:20.5.0~dfsg+~cs6.13.40431414-1) unstable; urgency=medium
+
+  [ upstream ]
+  * new release
+
+  [ Jonas Smedegaard ]
+  * unfuzz patches
+
+ -- Jonas Smedegaard <dr@jones.dk>  Sat, 25 Nov 2023 12:25:03 +0100
+
 asterisk (1:20.4.0~dfsg+~cs6.13.40431414-2) unstable; urgency=medium
 
   * build-depend on liblua5.1-dev (not liblua5.2-dev);
@@ -14,7 +165,9 @@ asterisk (1:20.4.0~dfsg+~cs6.13.40431414-1) unstable; urgency=medium
   [ Jonas Smedegaard ]
   * stop depend on lsb-base
   * update watch file:
-    + fixate component pjproject at upstream release 2.13.1
+    + fixate component pjproject at upstream release 2.13.1;
+      fixes these upstream bugs:
+      CVE-2022-23537 CVE-2022-23547 CVE-2022-39269 CVE-2023-27585
   * unfuzz patches
   * update copyright info: update coverage
 

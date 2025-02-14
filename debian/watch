@@ -8,4 +8,4 @@ pgpmode=auto,\
 uversionmangle=s/\d\K-(rc)/~~$1/,\
 dversionmangle=auto \
 https://downloads.asterisk.org/pub/telephony/asterisk/releases/ \
-asterisk-(20(?:\.\d+)+(?:-rc\d)?)@ARCHIVE_EXT@ group
+asterisk-(22(?:\.\d+)+(?:-rc\d)?)@ARCHIVE_EXT@ group

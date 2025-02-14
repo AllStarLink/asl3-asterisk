@@ -32,7 +32,7 @@ git clone git@github.com:AllStarLink/app_rpt.git
 
 4. Execute the `build-tree` process. For example:
 ``` 
-asl3-asterisk/build-tree -a 22.1.0 -v 3.3 -r 1
+asl3-asterisk/build-tree -a 22.2.0 -v 3.3 -r 1
 ```
 See [Building Debs](./building_debs.md) for information
 on what to supply for `-a`, `-r`, and `-v`.
@@ -50,7 +50,7 @@ for the build environment.
 
 The build-tree script takes three options:
 
-* `-a ASTERISK_VERSION` - The Asterisk version; e.g. 22.1.0
+* `-a ASTERISK_VERSION` - The Asterisk version; e.g. 22.2.0
 
 * `-v APP_RPT_VERSION` - The app\_rpt version. In prerelease this
 is simply 0.0.n.${COMMIT\_ID} where n is monotonically increasing
