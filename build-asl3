@@ -22,10 +22,15 @@ REL_VER="${REL_VER:-$REL_PKG}"
 
 # ---------- ---------- ---------- ---------- ---------- ----------
 
+# Build options
+BUILD_OPTIONS=(terse)
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
 usage()
 {
     cat <<_EOT_ 1>&2
-Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] ACTIONS 
+Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] OPTIONS ACTIONS 
 
 Options :
   -a  Asterisk version        (e.g. 22.2.0)
@@ -34,7 +39,12 @@ Options :
   -d  local install directory (default: "/")
   -l  Create merged source directory with symlinks
 
-Actions (specify one or more) :
+OPTIONS (specify zero or more) :
+  debug   - build with "debug" options
+  devmode - build with "development" options
+  thin    - disable most modules from building
+
+ACTIONS (specify one or more) :
   source  - create the merged source directory
   clean   - "clean" the merged source directory
   build   - "build" the source code
@@ -111,6 +121,9 @@ DO_BUILD=0
 DO_INSTALL=0
 DO_PACKAGE=0
 
+DO_DEBUG=
+DO_THIN=0
+
 if [[ $# -eq 0 ]]; then
     echo "***"					1>&2
     echo "*** No action(s) specified"		1>&2
@@ -161,6 +174,27 @@ while [[ $# -gt 0 ]]; do
 	fi
 	DO_PACKAGE=1
 	;;
+    "debug" )
+	if [[ -n "$DO_DEBUG" && "$DO_DEBUG" != "debug" ]]; then
+	    echo "***"							1>&2
+	    echo "*** Can't specify both \"debug\" and \"devmode\""	1>&2
+	    echo "***"							1>&2
+	    exit 1
+	fi
+	DO_DEBUG="debug"
+	;;
+    "devmode" )
+	if [[ -n "$DO_DEBUG" && "$DO_DEBUG" != "devmode" ]]; then
+	    echo "***"							1>&2
+	    echo "*** Can't specify both \"debug\" and \"devmode\""	1>&2
+	    echo "***"							1>&2
+	    exit 1
+	fi
+	DO_DEBUG="devmode"
+	;;
+    "thin" )
+	DO_THIN=1
+	;;
     * )
 	usage
 	;;
@@ -176,6 +210,14 @@ case "${AST_VER}" in
 	QUILT_SERIES="debian/patches/series"
 	;;
 esac
+
+if [[ -n $DO_DEBUG ]]; then
+    BUILD_OPTIONS+=($DO_DEBUG)
+fi
+
+if [[ $DO_THIN -ne 0 ]]; then
+    BUILD_OPTIONS+=("thin")
+fi
 
 # ---------- ---------- ---------- ---------- ---------- ----------
 
@@ -414,6 +456,9 @@ merge_app_rpt()
 
 merge_asl3_asterisk()
 {
+    # ensure that the debian/patches/series file is a fresh copy/link
+    rm -f "${MERGE_DIR}/debian/patches/series"
+
     pushd "${ASL3_ASTERISK_DIR}"
     copy_path "debian"			"${MERGE_DIR}/debian"
     copy_path "rpt-sounds"		"${MERGE_DIR}/rpt-sounds"
@@ -461,7 +506,9 @@ create_build_directory()
 	echo "Select patch series ($QUILT_SERIES)"
 	DPKG_VENDOR=$(dpkg-vendor --query vendor | tr '[:upper:]' '[:lower:]')
 	DPKG_SERIES=$(basename $QUILT_SERIES)
-	ln -f -s ${DPKG_SERIES} debian/patches/${DPKG_VENDOR}.series
+	VENDOR_SERIES=debian/patches/${DPKG_VENDOR}.series
+	rm -f ${VENDOR_SERIES}
+	ln -s ${DPKG_SERIES} ${VENDOR_SERIES}
     fi
 
     echo "Add version"
@@ -532,7 +579,8 @@ do_build()
     pushd "${MERGE_DIR}"
 
     echo "Build"
-    dh build -j$(nproc --all)
+    DEB_BUILD_OPTIONS=${BUILD_OPTIONS[*]}	\
+	dh build -j$(nproc --all)
     RC=$?
     if [[ $RC -ne 0 ]]; then
 	echo "dh build failed (exit code $RC)."		1>&2

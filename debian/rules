@@ -36,21 +36,37 @@ LDFLAGS += -Wl,--as-needed
 # Sanity check for a stable release:
 SAVED_ABI_HASH = 1fb7f5c06d7a2052e38d021b3d8ca151
 
+# Sanity check for a "debug" release:
+SAVED_ABI_HASH_DEBUG = 30ef0c93b36035ec78c9cfd712d36d9b
+
+# Sanity check for a "devmode" release:
+SAVED_ABI_HASH_DEVMODE = bb03831fad60f4f83910a9b4054f5bdf
+
 # don't let asterisk mess with build flags
-BUILDFLAGS += AST_FORTIFY_SOURCE= DEBUG= OPTIMIZE=
+BUILDFLAGS += AST_FORTIFY_SOURCE=
+BUILDFLAGS += DEBUG= OPTIMIZE=
+BUILDFLAGS += OPTIMIZE=
+
+# "configure" options
+EXTRA_CONFIGURE_OPTS =
 
 # show full gcc arguments unless DEB_BUILD_OPTIONS=terse
 ifeq (,$(filter terse,$(DEB_BUILD_OPTIONS)))
 BUILDFLAGS += NOISY_BUILD=yes
 endif
 
-BUILDFLAGS += ASTDATADIR=/usr/share/asterisk ASTVARRUNDIR=/var/run/asterisk
+BUILDFLAGS += ASTDATADIR=/usr/share/asterisk
+BUILDFLAGS += ASTVARRUNDIR=/var/run/asterisk
 
 ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	INSTALL_PROGRAM += -s
 endif
 
 ADDONS_ENABLE =
+ADDONS_DISABLE =
+CATEGORY_ENABLE =
+CATEGORY_DISABLE =
+
 ADDONS_ENABLE += aelparse
 ADDONS_ENABLE += chan_mobile
 ADDONS_ENABLE += chan_ooh323
@@ -58,10 +74,176 @@ ADDONS_ENABLE += format_mp3
 ADDONS_ENABLE += res_config_mysql
 ADDONS_ENABLE += smsq
 
-ADDONS_DISABLE = BUILD_NATIVE
+ADDONS_DISABLE += BUILD_NATIVE
 
-ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
-ADDONS_ENABLE += BETTER_BACKTRACES DEBUG_THREADS
+# "thin" (phreaknet "lightweight" but tailored for ASL3)
+ifneq (,$(findstring thin,$(DEB_BUILD_OPTIONS)))
+	# start by disabling almost everything.
+#	CATEGORY_DISABLE += MENUSELECT_ADDONS
+	CATEGORY_DISABLE += MENUSELECT_AGIS
+	CATEGORY_DISABLE += MENUSELECT_APPS
+	CATEGORY_DISABLE += MENUSELECT_CDR
+	CATEGORY_DISABLE += MENUSELECT_CEL
+#	CATEGORY_DISABLE += MENUSELECT_CFLAGS
+	CATEGORY_DISABLE += MENUSELECT_CHANNELS
+	CATEGORY_DISABLE += MENUSELECT_CODECS
+	CATEGORY_DISABLE += MENUSELECT_FORMATS
+	CATEGORY_DISABLE += MENUSELECT_FUNCS
+	CATEGORY_DISABLE += MENUSELECT_PBX
+	CATEGORY_DISABLE += MENUSELECT_RES
+	CATEGORY_DISABLE += MENUSELECT_TESTS
+	CATEGORY_DISABLE += MENUSELECT_UTILS
+	# add back "modules.conf"
+	ADDONS_ENABLE += func_frame_trace
+	# Applications
+ 	ADDONS_ENABLE += app_authenticate
+ 	ADDONS_ENABLE += app_dial
+ 	ADDONS_ENABLE += app_exec
+ 	ADDONS_ENABLE += app_gps
+	ADDONS_ENABLE += app_playback
+	ADDONS_ENABLE += app_rpt
+	ADDONS_ENABLE += app_sendtext
+	ADDONS_ENABLE += app_system
+	ADDONS_ENABLE += app_transfer
+	# Channel Drivers
+	ADDONS_ENABLE += chan_dahdi
+	ADDONS_ENABLE += chan_echolink
+	ADDONS_ENABLE += chan_iax2
+	ADDONS_ENABLE += chan_mobile
+	ADDONS_ENABLE += chan_ooh323
+	ADDONS_ENABLE += chan_simpleusb
+	ADDONS_ENABLE += chan_tlb
+	ADDONS_ENABLE += chan_usbradio
+	ADDONS_ENABLE += chan_usrp
+	ADDONS_ENABLE += chan_voter
+	# Codecs
+	ADDONS_ENABLE += codec_a_mu
+	ADDONS_ENABLE += codec_adpcm
+	ADDONS_ENABLE += codec_alaw
+	ADDONS_ENABLE += codec_dahdi
+	ADDONS_ENABLE += codec_g722
+	ADDONS_ENABLE += codec_g726
+	ADDONS_ENABLE += codec_gsm
+	ADDONS_ENABLE += codec_resample
+	ADDONS_ENABLE += codec_ulaw
+	# Formats
+	ADDONS_ENABLE += format_g723
+	ADDONS_ENABLE += format_g726
+	ADDONS_ENABLE += format_g729
+	ADDONS_ENABLE += format_gsm
+	ADDONS_ENABLE += format_h263
+	ADDONS_ENABLE += format_h264
+	ADDONS_ENABLE += format_ilbc
+	ADDONS_ENABLE += format_mp3
+	ADDONS_ENABLE += format_pcm
+	ADDONS_ENABLE += format_sln
+	ADDONS_ENABLE += format_vox
+	ADDONS_ENABLE += format_wav
+	ADDONS_ENABLE += format_wav_gsm
+	# Functions
+	ADDONS_ENABLE += func_base64
+	ADDONS_ENABLE += func_callerid
+	ADDONS_ENABLE += func_cdr
+	ADDONS_ENABLE += func_channel
+	ADDONS_ENABLE += func_curl
+	ADDONS_ENABLE += func_cut
+	ADDONS_ENABLE += func_db
+	ADDONS_ENABLE += func_enum
+	ADDONS_ENABLE += func_env
+	ADDONS_ENABLE += func_global
+	ADDONS_ENABLE += func_groupcount
+	ADDONS_ENABLE += func_logic
+	ADDONS_ENABLE += func_math
+	ADDONS_ENABLE += func_md5
+	ADDONS_ENABLE += func_rand
+	ADDONS_ENABLE += func_realtime
+	ADDONS_ENABLE += func_sha1
+	ADDONS_ENABLE += func_strings
+	ADDONS_ENABLE += func_timeout
+	ADDONS_ENABLE += func_uri
+	# Core/PBX
+	ADDONS_ENABLE += pbx_config
+	# Resources
+	ADDONS_ENABLE += res_crypto
+	ADDONS_ENABLE += res_curl
+	ADDONS_ENABLE += res_rpt_http_registrations
+	ADDONS_ENABLE += res_timing_dahdi
+	ADDONS_ENABLE += res_timing_timerfd
+	ADDONS_ENABLE += res_usbradio
+	# SIP, Autopatch
+	ADDONS_ENABLE += bridge_builtin_features
+	ADDONS_ENABLE += bridge_builtin_interval_features
+	ADDONS_ENABLE += bridge_holding
+	ADDONS_ENABLE += bridge_native_rtp
+	ADDONS_ENABLE += bridge_simple
+	ADDONS_ENABLE += bridge_softmix
+	ADDONS_ENABLE += chan_bridge_media
+	ADDONS_ENABLE += chan_pjsip
+	ADDONS_ENABLE += func_devstate
+	ADDONS_ENABLE += func_pjsip_endpoint
+	ADDONS_ENABLE += func_sorcery
+	ADDONS_ENABLE += res_pjproject
+	ADDONS_ENABLE += res_pjsip
+	ADDONS_ENABLE += res_pjsip_acl
+	ADDONS_ENABLE += res_pjsip_authenticator_digest
+	ADDONS_ENABLE += res_pjsip_caller_id
+	ADDONS_ENABLE += res_pjsip_dialog_info_body_generator
+	ADDONS_ENABLE += res_pjsip_diversion
+	ADDONS_ENABLE += res_pjsip_dtmf_info
+	ADDONS_ENABLE += res_pjsip_endpoint_identifier_anonymous
+	ADDONS_ENABLE += res_pjsip_endpoint_identifier_ip
+	ADDONS_ENABLE += res_pjsip_endpoint_identifier_user
+	ADDONS_ENABLE += res_pjsip_exten_state
+	ADDONS_ENABLE += res_pjsip_header_funcs
+	ADDONS_ENABLE += res_pjsip_logger
+	ADDONS_ENABLE += res_pjsip_messaging
+	ADDONS_ENABLE += res_pjsip_mwi
+	ADDONS_ENABLE += res_pjsip_mwi_body_generator
+	ADDONS_ENABLE += res_pjsip_nat
+	ADDONS_ENABLE += res_pjsip_notify
+	ADDONS_ENABLE += res_pjsip_one_touch_record_info
+	ADDONS_ENABLE += res_pjsip_outbound_authenticator_digest
+	ADDONS_ENABLE += res_pjsip_outbound_publish
+	ADDONS_ENABLE += res_pjsip_outbound_registration
+	ADDONS_ENABLE += res_pjsip_path
+	ADDONS_ENABLE += res_pjsip_pidf_body_generator
+	ADDONS_ENABLE += res_pjsip_pidf_digium_body_supplement
+	ADDONS_ENABLE += res_pjsip_pidf_eyebeam_body_supplement
+	ADDONS_ENABLE += res_pjsip_publish_asterisk
+	ADDONS_ENABLE += res_pjsip_pubsub
+	ADDONS_ENABLE += res_pjsip_refer
+	ADDONS_ENABLE += res_pjsip_registrar
+	ADDONS_ENABLE += res_pjsip_rfc3326
+	ADDONS_ENABLE += res_pjsip_sdp_rtp
+	ADDONS_ENABLE += res_pjsip_send_to_voicemail
+	ADDONS_ENABLE += res_pjsip_session
+	ADDONS_ENABLE += res_pjsip_t38
+	ADDONS_ENABLE += res_pjsip_transport_websocket
+	ADDONS_ENABLE += res_pjsip_xpidf_body_generator
+	ADDONS_ENABLE += res_rtp_asterisk
+	ADDONS_ENABLE += res_sorcery_astdb
+	ADDONS_ENABLE += res_sorcery_config
+	ADDONS_ENABLE += res_sorcery_memory
+	ADDONS_ENABLE += res_sorcery_realtime
+endif
+
+# "devmode", "debug"
+ifneq (,$(findstring devmode,$(DEB_BUILD_OPTIONS)))
+	# build w/"developer"
+	EXTRA_CONFIGURE_OPTS += --enable-dev-mode
+	ADDONS_ENABLE += BETTER_BACKTRACES
+	ADDONS_ENABLE += COMPILE_DOUBLE
+	ADDONS_ENABLE += DEBUG_FD_LEAKS
+	ADDONS_ENABLE += DEBUG_THREADS
+	#ADDONS_ENABLE += DETECT_DEADLOCKS
+	ADDONS_ENABLE += DONT_OPTIMIZE
+	ADDONS_ENABLE += DO_CRASH
+	ADDONS_ENABLE += MALLOC_DEBUG
+	#ADDONS_ENABLE += THREAD_CRASH
+else ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	# build w/"debug"
+	ADDONS_ENABLE += BETTER_BACKTRACES
+	ADDONS_ENABLE += DEBUG_THREADS
 endif
 
 # make sure we have 'fetch' . We need to have either wget or fetch
@@ -89,15 +271,32 @@ override_dh_autoreconf:
 	echo $(DEB_VERSION_UPSTREAM_REVISION) > .version
 	dh_autoreconf -- ./bootstrap.sh
 
-execute_before_dh_auto_configure:
+override_dh_auto_configure:
+	# Pre-configuration steps
+	@echo ""
+	@echo "DEB_BUILD_OPTIONS    : $(DEB_BUILD_OPTIONS)"
+	@echo "CATEGORY_ENABLE      : $(CATEGORY_ENABLE)"
+	@echo "CATEGORY_DISABLE     : $(CATEGORY_DISABLE)"
+	@echo "ADDONS_ENABLE        : $(ADDONS_ENABLE)"
+	@echo "ADDONS_DISABLE       : $(ADDONS_DISABLE)"
+	@echo "BUILDFLAGS           : $(BUILDFLAGS)"
+	@echo "EXTRA_CONFIGURE_OPTS : $(EXTRA_CONFIGURE_OPTS)"
+	@echo ""
 	chmod 755 debian/dummyprogs/fetch
-	rm --force --recursive addons/mp3
-	contrib/scripts/get_mp3_source.sh
+	if [ ! -f addons/mp3/mpg123.h ]; then \
+	  rm --force --recursive addons/mp3; \
+	  contrib/scripts/get_mp3_source.sh; \
+	fi
+	# Run dh_auto_configure with conditional options
+	dh_auto_configure -- $(EXTRA_CONFIGURE_OPTS)
+
 
 execute_before_dh_auto_build:
 	$(MAKE) menuselect.makeopts BUILD_CFLAGS="$(CFLAGS)" BUILD_LDFLAGS="$(LDFLAGS)"
-	for module in $(ADDONS_ENABLE); do menuselect/menuselect --enable $$module menuselect.makeopts; done
+	for module in $(CATEGORY_DISABLE); do menuselect/menuselect --disable-category $$module menuselect.makeopts; done
+	for module in $(CATEGORY_ENABLE); do menuselect/menuselect --enable-category $$module menuselect.makeopts; done
 	for module in $(ADDONS_DISABLE); do menuselect/menuselect --disable $$module menuselect.makeopts; done
+	for module in $(ADDONS_ENABLE); do menuselect/menuselect --enable $$module menuselect.makeopts; done
 
 override_dh_auto_build:
 	$(FETCH_ENV) dh_auto_build -- $(BUILDFLAGS)
@@ -106,11 +305,23 @@ execute_after_dh_auto_build: $(DOCS) $(CHANGELOGS) $(MANPAGES)
 	# Sanity check: don't break the ABI for modules:
 	@abi_hash=$$(awk -F'"' '/AST_BUILDOPT_SUM/ {print $$2}' \
 	  include/asterisk/buildopts.h); \
-	  if [ "$$abi_hash" != "$(SAVED_ABI_HASH)" ]; then \
+	  if [ "$$abi_hash" = "$(SAVED_ABI_HASH)" ]; then \
+	    echo "Using \"release\" ABI"; \
+	  elif [ "$$abi_hash" = "$(SAVED_ABI_HASH_DEBUG)" ]; then \
+	    echo "****************************************************************"; \
+	    echo "Using \"debug\" ABI (may not be compatible with \"release\" builds)"; \
+	    echo "****************************************************************"; \
+	  elif [ "$$abi_hash" = "$(SAVED_ABI_HASH_DEVMODE)" ]; then \
+	    echo "******************************************************************"; \
+	    echo "Using \"dev mode\" ABI (may not be compatible with \"release\" builds)"; \
+	    echo "******************************************************************"; \
+	  else \
+	    echo "***********************************************"; \
 	    echo "Debian packaging problem: ABI checksum changed."; \
 	    echo "  Was: $(SAVED_ABI_HASH)"; \
 	    echo "  Now: $$abi_hash"; \
 	    echo "Check include/asterisk/buildopts.h"; \
+	    echo "***********************************************"; \
 	    [ -n "$(EXP_RELEASE)" ] || exit 1; \
 	  fi
 
