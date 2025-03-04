@@ -12,7 +12,7 @@ usr/share/asterisk/rest-api
 usr/share/asterisk/moh
 usr/share/asterisk/sounds
 usr/share/dahdi/span_config.d/50-asterisk
-etc/modprobe.d
+etc/modprobe.d/*.conf
 etc/modules-load.d/*.conf
 etc/udev/rules.d/*.rules
 var/lib/asterisk/scripts/*
