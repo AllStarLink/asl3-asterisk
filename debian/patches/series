@@ -20,6 +20,7 @@ config_c_fix_template_writing.patch
 #config_c_fix_ref_leak.patch
 #config_c_fix_tryinclude.patch
 #config_c_fix_whitespace.patch
+config_c_fix_missing_include_crash.patch
 sounds_ulaw_default
 enable_custom_sounddir.patch
 #chan_iax2_unknown_format.patch
