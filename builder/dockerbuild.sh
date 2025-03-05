@@ -117,7 +117,6 @@ git config --system url.https://$GITHUB_TOKEN@github.com/.insteadOf https://gith
 git config --system user.email "builder@allstarlink.org"
 
 cd $ALL_PKG_ROOT
-git clone https://github.com/AllStarLink/app_rpt
 
 D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
