@@ -91,7 +91,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 +
 +[Service]
 +Type=notify
-+ExecStart=__ASTERISK_SBIN_DIR__/asterisk -g -f -p -U asterisk -G asterisk
++ExecStart=__ASTERISK_SBIN_DIR__/asterisk -g -f -p -U asterisk
 +ExecReload=__ASTERISK_SBIN_DIR__/asterisk -rx 'core reload'
 +Restart=on-failure
 +RestartSec=5
