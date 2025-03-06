@@ -68,6 +68,17 @@ EDITOR=${EDITOR:-${ALT_EDIT:-vim}}
 export EMAIL=${EMAIL:-"builder@allstarlink.org"}
 USE_SYMLINKS=0
 
+# check if root
+SUDO=""
+if [ $EUID != 0 ]; then
+    SUDO="sudo"
+    SUDO_EUID=$(${SUDO} id -u)
+    if [ ${SUDO_EUID} -ne 0 ]; then
+	echo "This script must be run as root or with sudo"
+	exit 1
+    fi
+fi
+
 while getopts "a:d:lr:v:" o; do
     case "${o}" in
     "a" )
@@ -473,7 +484,7 @@ create_build_directory()
 	# Make sure we have all of the build dependencies
 	#
 	echo "Installing build dependencies"
-	sudo "${ASL3_ASTERISK_DIR}/install-build-deps"
+	${SUDO} "${ASL3_ASTERISK_DIR}/install-build-deps"
 
 	#
 	# Create the merged build directory
@@ -597,7 +608,7 @@ do_install()
     pushd "${MERGE_DIR}"
 
     echo "Installing (locally)"
-    sudo make install DESTDIR="${DESTDIR}"
+    ${SUDO} make install DESTDIR="${DESTDIR}"
     RC=$?
     if [[ $RC -ne 0 ]]; then
 	echo "make install failed (exit code $RC)."	1>&2
