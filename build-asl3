@@ -16,10 +16,6 @@ RPT_PKG="${ASL_PKG_INFO%-*}"
 ASL_PKG_INFO="${ASL_PKG_INFO#${RPT_PKG}-}"
 REL_PKG="${ASL_PKG_INFO%.deb*}"
 
-AST_VER="${AST_VER:-$AST_PKG}"
-RPT_VER="${RPT_VER:-$RPT_PKG}"
-REL_VER="${REL_VER:-$REL_PKG}"
-
 # ---------- ---------- ---------- ---------- ---------- ----------
 
 # Build options
@@ -107,6 +103,57 @@ while getopts "a:d:lr:v:" o; do
 done
 shift $((OPTIND-1))
 
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+if [[ -z "${AST_VER}" ]]; then
+    if [[ -x ../asterisk/build_tools/make_version ]]; then
+	pushd ../asterisk	>/dev/null
+	AST_REPO=$(build_tools/make_version .)
+	popd			>/dev/null
+	if [[ $AST_REPO =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+	    AST_VER="$AST_REPO"
+	    echo "Using [repo] AST_VER=$AST_VER"
+	else
+	    AST_REPO=""
+	fi
+    fi
+fi
+
+if [[ -z "${AST_VER}" && -n "${AST_PKG}" ]]; then
+    AST_VER="$AST_PKG"
+    echo "Using [package] AST_VER=$AST_VER"
+fi
+
+if [[ -z "${RPT_VER}" ]]; then
+    if [[ -f ../app_rpt/apps/app_rpt/app_rpt.h ]]; then
+	MAJ=$(grep VERSION_MAJOR ../app_rpt/apps/app_rpt/app_rpt.h)
+	MIN=$(grep VERSION_MINOR ../app_rpt/apps/app_rpt/app_rpt.h)
+	PAT=$(grep VERSION_PATCH ../app_rpt/apps/app_rpt/app_rpt.h)
+	RPT_REPO="${MAJ##* }.${MIN##* }.${PAT##* }"
+	if [[ "${RPT_REPO}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+	    RPT_VER="${RPT_REPO}"
+	    echo "Using [repo] RPT_VER=$RPT_VER"
+	else
+	    RPT_REPO=""
+	fi
+    fi
+fi
+
+if [[ -z "${RPT_VER}" && -n "${RPT_PKG}" ]]; then
+    RPT_VER="$RPT_PKG"
+    echo "Using [package] RPT_VER=$RPT_VER"
+fi
+
+if [[ -z "${REL_VER}" ]]; then
+    if [[ -n "${AST_REPO}" && -n "${RPT_REPO}" ]]; then
+	REL_VER=1
+	echo "Using REL_VER=$REL_VER"
+    elif [[ -n "${REL_PKG}" ]]; then
+	REL_VER="$REL_PKG"
+	echo "Using [package] REL_VER=$REL_VER"
+    fi
+fi
+
 if [[ -z "${AST_VER}" || -z "${RPT_VER}" || -z "${REL_VER}" ]]; then
     echo "***"					1>&2
     echo "*** Version(s) not specified"		1>&2
@@ -114,6 +161,8 @@ if [[ -z "${AST_VER}" || -z "${RPT_VER}" || -z "${REL_VER}" ]]; then
     echo ""					1>&2
     usage
 fi
+
+# ---------- ---------- ---------- ---------- ---------- ----------
 
 EPOCH="2"
 FULL_REL="${REL_VER}.deb$(lsb_release -rs 2> /dev/null)"
