@@ -8,7 +8,7 @@ build-asl3 - Build ASL3 Asterisk + app\_rpt
 
 # SYNOPSIS
 
-Usage: `build-asl3 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] OPTIONS ACTIONS`
+Usage: `build-asl3 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] [-m MERGE_DIR] OPTIONS ACTIONS`
 
 Options :
 
@@ -17,12 +17,15 @@ Options :
 * -r  Release version (default: installed (or latest) version, e.g. "1")
 * -d  local install directory (default: "/")
 * -l  Create merged source directory with symlinks
+* -m  merge directory path    (default: based on version #'s)
+* -x  compare source file content vs. modification dates
 
 OPTIONS (specify zero or more) :
 
 * debug   - build with "debug" options
 * devmode - build with "development" options
 * thin    - disable most modules from building
+* zap     - start with empty merged source directory
 
 ACTIONS (specify one or more) :
 

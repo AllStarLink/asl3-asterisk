@@ -26,7 +26,7 @@ BUILD_OPTIONS=(terse)
 usage()
 {
     cat <<_EOT_ 1>&2
-Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] [-m MERGE_DIR] OPTIONS ACTIONS 
+Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] [-m MERGE_DIR] [-x] OPTIONS ACTIONS 
 
 Options :
   -a  Asterisk version        (e.g. 22.2.0)
