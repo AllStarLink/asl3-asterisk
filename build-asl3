@@ -26,7 +26,7 @@ BUILD_OPTIONS=(terse)
 usage()
 {
     cat <<_EOT_ 1>&2
-Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] OPTIONS ACTIONS 
+Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] [-m MERGE_DIR] OPTIONS ACTIONS 
 
 Options :
   -a  Asterisk version        (e.g. 22.2.0)
@@ -34,11 +34,14 @@ Options :
   -r  Release version         (e.g. 1)
   -d  local install directory (default: "/")
   -l  Create merged source directory with symlinks
+  -m  merge directory path    (default: based on version #'s)
+  -x  compare source file content vs. modification dates
 
 OPTIONS (specify zero or more) :
   debug   - build with "debug" options
   devmode - build with "development" options
   thin    - disable most modules from building
+  zap     - start with empty merged source directory
 
 ACTIONS (specify one or more) :
   source  - create the merged source directory
@@ -62,6 +65,7 @@ _EOT_
 DESTDIR=${DESTDIR:-"/"}
 EDITOR=${EDITOR:-${ALT_EDIT:-vim}}
 export EMAIL=${EMAIL:-"builder@allstarlink.org"}
+USE_COMPARE=0
 USE_SYMLINKS=0
 
 # check if root
@@ -75,7 +79,7 @@ if [ $EUID != 0 ]; then
     fi
 fi
 
-while getopts "a:d:lr:v:" o; do
+while getopts "a:d:lm:r:v:x" o; do
     case "${o}" in
     "a" )
 	AST_VER=${OPTARG}
@@ -91,6 +95,12 @@ while getopts "a:d:lr:v:" o; do
 	;;
     "l" )
 	USE_SYMLINKS=1
+	;;
+    "m" )
+	MERGE_DIR=${OPTARG}
+	;;
+    "x" )
+	USE_COMPARE=1
 	;;
     * )
 	echo "***"				1>&2
@@ -173,8 +183,26 @@ BASE_DIR="${BASE_DIR%/asl3-asterisk}"
 ASL3_ASTERISK_DIR="${BASE_DIR}/asl3-asterisk"
 ASTERISK_DIR="${BASE_DIR}/asterisk"
 APP_RPT_DIR="${BASE_DIR}/app_rpt"
-MERGE_DIR="${BASE_DIR}/asl3-asterisk-${VSTR}"
 
+if [[ -n "${MERGE_DIR}" ]]; then
+    REAL_MERGE_DIR=$(realpath "$MERGE_DIR")
+
+    REAL_ASTERISK_DIR=$(realpath "$ASTERISK_DIR")
+    if [[ "$REAL_MERGE_DIR}" = "${REAL_ASTERISK_DIR}" ]]; then
+	echo "MERGE_DIR conflicts with \"asterisk\" source directory"
+	exit 1"
+    fi
+
+    REAL_APP_RPT_DIR=$(realpath "$APP_RPT_DIR")
+    if [[ "$REAL_MERGE_DIR}" = "${REAL_APP_RPT_DIR}" ]]; then
+	echo "MERGE_DIR conflicts with \"app_rpt\" source directory"
+	exit 1"
+    fi
+else
+    MERGE_DIR="${BASE_DIR}/asl3-asterisk-${VSTR}"
+fi
+
+DO_ZAP=0
 DO_SOURCE=0
 DO_CLEAN=0
 DO_BUILD=0
@@ -194,6 +222,9 @@ fi
 
 while [[ $# -gt 0 ]]; do
     case "${1}" in
+    "zap" )
+	DO_ZAP=1
+	;;
     "source" )
 	DO_SOURCE=1
 	;;
@@ -201,7 +232,7 @@ while [[ $# -gt 0 ]]; do
 	DO_CLEAN=1
 	;;
     "build" )
-	if [[ ! -d "${MERGE_DIR}" ]]; then
+	if [[ ! -d "${MERGE_DIR}" || $DO_ZAP -gt 0 ]]; then
 	    DO_SOURCE=1
 	fi
 	DO_BUILD=1
@@ -281,6 +312,38 @@ fi
 
 # ---------- ---------- ---------- ---------- ---------- ----------
 
+do_zap()
+{
+    if [[ ! -d "${MERGE_DIR}" ]]; then
+	return
+    fi
+
+    echo ""
+    echo "The merge directory is \"${MERGE_DIR}\""
+    echo ""
+    read -p "Do you really want to clean (empty) all content here? (y/[n]): " answer
+    case "$answer" in
+	[Yy]* )
+	    break
+	    ;;
+	* )
+	    echo "Not zapping the merge directory"
+	    return
+	    ;;
+    esac
+
+    pushd "${MERGE_DIR}"
+
+    # clean out any prior content
+    echo ""
+    echo "Cleaning (emptying) merge directory"
+    rm -rf [a-zA-Z]* .[a-zA-Z]*
+
+    popd
+}
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
 copy_path()
 {
     src_path="$1"
@@ -312,9 +375,17 @@ copy_path()
 		fi
 	    elif [[ -f "$src_path/$path" ]]; then
 		if [[ -f "$dst_path/$path" ]]; then
-		    if [[ "$(stat -c %Y "$src_path/$path")" -gt "$(stat -c %Y "$dst_path/$path")" ]]; then
-			echo "Update \"$src_path/$path\" --> \"$dst_path/$path\""
-			cp -p "$src_path/$path" "$dst_path/$path"
+		    if [[ $USE_COMPARE -ne 0 ]]; then
+			cmp --silent "$src_path/$path" "$dst_path/$path"
+			if [[ $? -ne 0 ]]; then
+			    echo "Update \"$src_path/$path\" --> \"$dst_path/$path\""
+			    cp -p "$src_path/$path" "$dst_path/$path"
+			fi
+		    else
+			if [[ "$(stat -c %Y "$src_path/$path")" -gt "$(stat -c %Y "$dst_path/$path")" ]]; then
+			    echo "Update \"$src_path/$path\" --> \"$dst_path/$path\""
+			    cp -p "$src_path/$path" "$dst_path/$path"
+			fi
 		    fi
 		else
 		    echo "Add \"$src_path/$path\" --> \"$dst_path/$path\""
@@ -685,6 +756,10 @@ do_package()
 }
 
 # ---------- ---------- ---------- ---------- ---------- ----------
+
+if [[ $DO_ZAP -gt 0 ]]; then
+    do_zap
+fi
 
 if [[ $DO_SOURCE -gt 0 ]]; then
     do_source
