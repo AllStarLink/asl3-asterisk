@@ -26,16 +26,17 @@ BUILD_OPTIONS=(terse)
 usage()
 {
     cat <<_EOT_ 1>&2
-Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] [-m MERGE_DIR] [-x] OPTIONS ACTIONS 
+Usage : $0 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-t] [-l] [-m MERGE_DIR] [-x] OPTIONS ACTIONS 
 
 Options :
   -a  Asterisk version        (e.g. 22.2.0)
   -v  ASL/app_rpt version     (e.g. 3.3.0)
   -r  Release version         (e.g. 1)
-  -d  local install directory (default: "/")
+  -d  Local install directory (default: "/")
   -l  Create merged source directory with symlinks
-  -m  merge directory path    (default: based on version #'s)
-  -x  compare source file content vs. modification dates
+  -m  Merge directory path    (default: based on version #'s)
+  -t  Setup test suite
+  -x  Compare source file content vs. modification dates
 
 OPTIONS (specify zero or more) :
   debug   - build with "debug" options
@@ -51,11 +52,14 @@ ACTIONS (specify one or more) :
   package - create Debian packages
 
 Note: specifying the "build", "install", or "package" actions will, if needed,
-create the merged source directory.
+      create the merged source directory.
 
 Note: the Asterisk, ASL/app_rpt, and Release versions will default to those
-of the "asl3-asterisk" package.  You can also use the "AST_VER", "RPT_VER",
-and "REL_VER" environment variables to specify the versions.
+      of the currently downloaded source code directories.  If the source
+      directories are not yet available then the version numbers will be
+      derived from the currently installed "asl3-asterisk" package.  You
+      can also use the "AST_VER", "RPT_VER", and "REL_VER" environment
+      variables to specify the versions.
 _EOT_
     exit 1
 }
@@ -67,6 +71,7 @@ EDITOR=${EDITOR:-${ALT_EDIT:-vim}}
 export EMAIL=${EMAIL:-"builder@allstarlink.org"}
 USE_COMPARE=0
 USE_SYMLINKS=0
+DO_TEST=0
 
 # check if root
 SUDO=""
@@ -79,7 +84,7 @@ if [ $EUID != 0 ]; then
     fi
 fi
 
-while getopts "a:d:lm:r:v:x" o; do
+while getopts "a:d:lm:r:tv:x" o; do
     case "${o}" in
     "a" )
 	AST_VER=${OPTARG}
@@ -98,6 +103,9 @@ while getopts "a:d:lm:r:v:x" o; do
 	;;
     "m" )
 	MERGE_DIR=${OPTARG}
+	;;
+    "t" )
+	DO_TEST=1
 	;;
     "x" )
 	USE_COMPARE=1
@@ -122,7 +130,7 @@ if [[ -z "${AST_VER}" ]]; then
 	popd			>/dev/null
 	if [[ $AST_REPO =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 	    AST_VER="$AST_REPO"
-	    echo "Using [repo] AST_VER=$AST_VER"
+	    echo "Using [repo] AST_VER=${AST_VER}"
 	else
 	    AST_REPO=""
 	fi
@@ -131,7 +139,7 @@ fi
 
 if [[ -z "${AST_VER}" && -n "${AST_PKG}" ]]; then
     AST_VER="$AST_PKG"
-    echo "Using [package] AST_VER=$AST_VER"
+    echo "Using [package] AST_VER=${AST_VER}"
 fi
 
 if [[ -z "${RPT_VER}" ]]; then
@@ -142,7 +150,7 @@ if [[ -z "${RPT_VER}" ]]; then
 	RPT_REPO="${MAJ##* }.${MIN##* }.${PAT##* }"
 	if [[ "${RPT_REPO}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 	    RPT_VER="${RPT_REPO}"
-	    echo "Using [repo] RPT_VER=$RPT_VER"
+	    echo "Using [repo] RPT_VER=${RPT_VER}"
 	else
 	    RPT_REPO=""
 	fi
@@ -151,7 +159,7 @@ fi
 
 if [[ -z "${RPT_VER}" && -n "${RPT_PKG}" ]]; then
     RPT_VER="$RPT_PKG"
-    echo "Using [package] RPT_VER=$RPT_VER"
+    echo "Using [package] RPT_VER=${RPT_VER}"
 fi
 
 if [[ -z "${REL_VER}" ]]; then
@@ -185,21 +193,51 @@ ASTERISK_DIR="${BASE_DIR}/asterisk"
 APP_RPT_DIR="${BASE_DIR}/app_rpt"
 
 if [[ -n "${MERGE_DIR}" ]]; then
-    REAL_MERGE_DIR=$(realpath "$MERGE_DIR")
+    REAL_MERGE_DIR=$(realpath -m "${MERGE_DIR}")
 
-    REAL_ASTERISK_DIR=$(realpath "$ASTERISK_DIR")
-    if [[ "$REAL_MERGE_DIR}" = "${REAL_ASTERISK_DIR}" ]]; then
+    REAL_ASTERISK_DIR=$(realpath -m "${ASTERISK_DIR}")
+    if [[ "${REAL_MERGE_DIR}" = "${REAL_ASTERISK_DIR}" ]]; then
 	echo "MERGE_DIR conflicts with \"asterisk\" source directory"
-	exit 1"
+	exit 1
     fi
 
-    REAL_APP_RPT_DIR=$(realpath "$APP_RPT_DIR")
-    if [[ "$REAL_MERGE_DIR}" = "${REAL_APP_RPT_DIR}" ]]; then
+    REAL_APP_RPT_DIR=$(realpath -m "${APP_RPT_DIR}")
+    if [[ "${REAL_MERGE_DIR}" = "${REAL_APP_RPT_DIR}" ]]; then
 	echo "MERGE_DIR conflicts with \"app_rpt\" source directory"
-	exit 1"
+	exit 1
     fi
+elif [[ $DO_TEST -ne 0 ]]; then
+    MERGE_DIR="/usr/src/asterisk-${AST_VER}-${RPT_VER}"
 else
     MERGE_DIR="${BASE_DIR}/asl3-asterisk-${VSTR}"
+fi
+echo "Merged build directory : ${MERGE_DIR}"
+
+MERGE_EMPTY=0
+if [[ ! -d "${MERGE_DIR}" ]]; then
+    # directory does not exist
+    MERGE_EMPTY=1
+else
+    find "${MERGE_DIR}" -mindepth 1 -maxdepth 1 -printf '%f\n' | grep -qv '^\.PREREQ_INSTALLED$'
+    if [[ $? -ne 0 ]]; then
+	# did NOT find any file other than .PREREQ_INSTALLED
+	MERGE_EMPTY=1
+    fi
+fi
+
+if [[ $DO_TEST -ne 0 ]]; then
+    TESTSUITE_DIR="$BASE_DIR/testsuite"
+    TESTSUITE_MERGE_DIR=$(dirname "${MERGE_DIR}")
+    TESTSUITE_MERGE_DIR+="/testsuite"
+
+    REAL_TESTSUITE_DIR=$(realpath -m "${TESTSUITE_DIR}")
+    REAL_TESTSUITE_MERGE_DIR=$(realpath -m "${TESTSUITE_MERGE_DIR}")
+    if [[ "$REAL_TESTSUITE_MERGE_DIR" = "${REAL_TESTSUITE_DIR}" ]]; then
+	echo "TESTSUITE_MERGE_DIR conflicts with \"testsuite\" source directory"
+	exit 1
+    fi
+
+    echo "Test suite directory   : ${TESTSUITE_MERGE_DIR}"
 fi
 
 DO_ZAP=0
@@ -210,6 +248,10 @@ DO_INSTALL=0
 DO_PACKAGE=0
 
 DO_DEBUG=
+if [[ $DO_TEST -ne 0 ]]; then
+    DO_DEBUG="devmode"
+fi
+
 DO_THIN=0
 
 if [[ $# -eq 0 ]]; then
@@ -232,13 +274,13 @@ while [[ $# -gt 0 ]]; do
 	DO_CLEAN=1
 	;;
     "build" )
-	if [[ ! -d "${MERGE_DIR}" || $DO_ZAP -gt 0 ]]; then
+	if [[ $MERGE_EMPTY -ne 0 || $DO_ZAP -gt 0 ]]; then
 	    DO_SOURCE=1
 	fi
 	DO_BUILD=1
 	;;
     "install" )
-	if [[ ! -d "${MERGE_DIR}" ]]; then
+	if [[ $MERGE_EMPTY -ne 0 ]]; then
 	    DO_SOURCE=1
 	fi
 	if [[ $DO_SOURCE -gt 0 ]]; then
@@ -249,7 +291,7 @@ while [[ $# -gt 0 ]]; do
 	DO_INSTALL=1
 	;;
     "package" )
-	if [[ ! -d "${MERGE_DIR}" ]]; then
+	if [[ $MERGE_EMPTY -ne 0 ]]; then
 	    DO_SOURCE=1
 	fi
 	if [[ $USE_SYMLINKS -ne 0 || -L "${MERGE_DIR}/README.md" ]]; then
@@ -266,18 +308,25 @@ while [[ $# -gt 0 ]]; do
 	DO_PACKAGE=1
 	;;
     "debug" )
-	if [[ -n "$DO_DEBUG" && "$DO_DEBUG" != "debug" ]]; then
-	    echo "***"							1>&2
-	    echo "*** Can't specify both \"debug\" and \"devmode\""	1>&2
-	    echo "***"							1>&2
-	    exit 1
+	if [[ -n "$DO_DEBUG" ]]; then
+	    if [[ $DO_TEST -gt 0 ]]; then
+		echo "**"						1>&2
+		echo "*** Can't specify both \"debug\" and \"test\""	1>&2
+		echo "***"						1>&2
+		exit 1
+	    elif [[ "$DO_DEBUG" != "debug" ]]; then
+		echo "***"						1>&2
+		echo "*** Can't specify both \"debug\" and \"devmode\""	1>&2
+		echo "***"						1>&2
+		exit 1
+	    fi
 	fi
 	DO_DEBUG="debug"
 	;;
     "devmode" )
 	if [[ -n "$DO_DEBUG" && "$DO_DEBUG" != "devmode" ]]; then
 	    echo "***"							1>&2
-	    echo "*** Can't specify both \"debug\" and \"devmode\""	1>&2
+	    echo "*** Can't specify both \"devmode\" and \"debug\""	1>&2
 	    echo "***"							1>&2
 	    exit 1
 	fi
@@ -310,21 +359,41 @@ if [[ $DO_THIN -ne 0 ]]; then
     BUILD_OPTIONS+=("thin")
 fi
 
+if [[ $DO_TEST -ne 0 ]]; then
+    BUILD_OPTIONS+=("testsuite")
+fi
+
+# ---------- ---------- ---------- ---------- ---------- ----------
+
+create_path()
+{
+    TARGET=$(realpath -m "$1")
+    if [[ -d "${TARGET}" ]]; then
+	return
+    fi
+
+    PARENT=$(dirname "$TARGET")
+    if [[ -w "$PARENT" ]]; then
+	mkdir -p "$TARGET"
+    else
+	${SUDO} mkdir -p "$TARGET"
+	${SUDO} chown "$USER": "$TARGET"
+    fi
+}
+
 # ---------- ---------- ---------- ---------- ---------- ----------
 
 do_zap()
 {
-    if [[ ! -d "${MERGE_DIR}" ]]; then
+    if [[ $MERGE_EMPTY -ne 0 ]]; then
 	return
     fi
 
-    echo ""
     echo "The merge directory is \"${MERGE_DIR}\""
     echo ""
     read -p "Do you really want to clean (empty) all content here? (y/[n]): " answer
     case "$answer" in
 	[Yy]* )
-	    break
 	    ;;
 	* )
 	    echo "Not zapping the merge directory"
@@ -337,7 +406,17 @@ do_zap()
     # clean out any prior content
     echo ""
     echo "Cleaning (emptying) merge directory"
+
+    HAVE_PREREQ=0
+    if [[ -e ".PREREQ_INSTALLED" ]]; then
+	HAVE_PREREQ=1
+    fi
+
     rm -rf [a-zA-Z]* .[a-zA-Z]*
+
+    if [[ $HAVE_PREREQ -ne 0 ]]; then
+	touch ".PREREQ_INSTALLED"
+    fi
 
     popd
 }
@@ -504,16 +583,16 @@ add_asterisk()
     if [[ ! -d "${ASTERISK_DIR}" ]]; then
 	echo "Cloning \"asterisk\", tag==${AST_VER}"
 	git clone https://github.com/asterisk/asterisk.git "${ASTERISK_DIR}"
-	( cd "${ASTERISK_DIR}"; git checkout $AST_VER )
+	( cd "${ASTERISK_DIR}"; git checkout ${AST_VER} )
     fi
 }
 
 add_app_rpt()
 {
     if [[ ! -d "${APP_RPT_DIR}" ]]; then
-	echo "Cloning \"app_rpt\""
+	echo "Cloning \"app_rpt\", tag==${RPT_VER}"
 	git clone https://github.com/AllStarLink/app_rpt.git "${APP_RPT_DIR}"
-	( cd "${APP_RPT_DIR}"; git checkout $RPT_VER )
+	( cd "${APP_RPT_DIR}"; git checkout ${RPT_VER} )
     fi
 }
 
@@ -522,6 +601,17 @@ add_asl3-asterisk()
     if [[ ! -d "${ASL3_ASTERISK_DIR}" ]]; then
 	echo "Cloning \"asl3-asterisk\""
 	git clone https://github.com/AllStarLink/asl3-asterisk.git "${ASL3_ASTERISK_DIR}"
+    fi
+}
+
+add_testsuite()
+{
+    if [[ ! -d "${TESTSUITE_DIR}" ]]; then
+	echo "Cloning Asterisk \"testsuite\""
+	git clone https://github.com/asterisk/testsuite.git "${TESTSUITE_DIR}"
+	if [[ -n "${TESTSUITE_VER}" ]]; then
+	    ( cd "${TESTSUITE_DIR}"; git checkout ${TESTSUITE_VER} )
+	fi
     fi
 }
 
@@ -540,7 +630,7 @@ merge_asterisk()
 
 merge_app_rpt()
 {
-    if [[ -d "${MERGE_DIR}" ]]; then
+    if [[ $MERGE_EMPTY -eq 0 ]]; then
 	pushd "${MERGE_DIR}"
 	if [[ -r Makefiles.diff ]]; then
 	    # if app_rpt <= 3.2.x, Asterisk <= 20.x.x
@@ -585,6 +675,29 @@ merge_app_rpt()
     popd
 }
 
+merge_testsuite()
+{
+    copy_path "${TESTSUITE_DIR}"	"${TESTSUITE_MERGE_DIR}"
+}
+
+merge_app_rpt_tests()
+{
+    if [[ -d "${TESTSUITE_MERGE_DIR}" ]]; then
+	pushd "${TESTSUITE_MERGE_DIR}"
+	revert_patch tests/apps/tests_apps.diff
+	popd
+    fi
+
+    pushd "${APP_RPT_DIR}"
+    copy_path "tests/apps/tests_apps.diff"	"${TESTSUITE_MERGE_DIR}/tests/apps/tests_apps.diff"
+    copy_path "tests/apps/rpt"			"${TESTSUITE_MERGE_DIR}/tests/apps/rpt"
+    popd
+
+    pushd "${TESTSUITE_MERGE_DIR}"
+    apply_patch tests/apps/tests_apps.diff
+    popd
+}
+
 merge_asl3_asterisk()
 {
     # ensure that the debian/patches/series file is a fresh copy/link
@@ -597,14 +710,20 @@ merge_asl3_asterisk()
     popd
 }
 
-create_build_directory()
+prepare_build_directory()
 {
-    if [[ ! -d "${MERGE_DIR}" ]]; then
+    #
+    # Create the merged build directory
+    #
+    create_path "${MERGE_DIR}"
+
+    if [[ ! -f "${MERGE_DIR}/.PREREQ_INSTALLED" ]]; then
 	#
 	# Make sure we have all of the build dependencies
 	#
 	echo "Installing build dependencies"
 	${SUDO} "${ASL3_ASTERISK_DIR}/install-build-deps"
+	touch "${MERGE_DIR}/.PREREQ_INSTALLED"
 
 	#
 	# Create the merged build directory
@@ -617,10 +736,6 @@ create_build_directory()
 	#
 	echo "Re-creating merged source directory (${MERGE_DIR})"
     fi
-
-    #
-    # Create the merged build directory
-    #
 
     echo "Add \"asterisk\""
     merge_asterisk
@@ -671,6 +786,122 @@ create_build_directory()
     popd
 }
 
+prepare_testsuite_directory()
+{
+    #
+    # Create the Asterisk "testsuite" directory
+    #
+    create_path "${TESTSUITE_MERGE_DIR}"
+
+    echo "Add Asterisk \"testsuite\""
+    merge_testsuite
+
+    echo "Add \"app_rpt\" tests, apply patches"
+    merge_app_rpt_tests
+
+    pushd ${TESTSUITE_MERGE_DIR}
+    if [[ ! -f ".PREREQ_INSTALLED" ]]; then
+	echo "Installing \"testsuite\" pre-requisites"
+	${SUDO} apt -y install aptitude
+	${SUDO} ./contrib/scripts/install_prereq install
+	RC=$?
+	if [[ $RC -ne 0 ]]; then
+	    echo "install_prereq install failed (exit code $RC)"	1>&2
+	    exit 1
+	fi
+
+	echo "Setting up \"testsuite\" environment"
+	${SUDO} ./setupVenv.sh
+	RC=$?
+	if [[ $RC -ne 0 ]]; then
+	    echo "setupVenv failed (exit code $RC)"			1>&2
+	    exit 1
+	fi
+	touch ".PREREQ_INSTALLED"
+    fi
+    popd
+}
+
+check_executable()
+{
+    #
+    # The Asterisk "testsuite" makes use of the "/tmp" directory. The
+    # suite needs to execute files (scripts) and uses more space than
+    # what we typically allocate on our appliance devices. Here, we
+    # check the "exec/noexec" status of the filesystem.
+    #
+
+    local FS=$1
+    if findmnt -n -o OPTIONS "$FS" | grep -q -w noexec; then
+	return 1
+    fi
+
+    return 0
+}
+
+check_multiarch()
+{
+    #
+    # Installing packages with "aptitude" can be problematic if any
+    # "foreign" [dpkg] architectures are defined. Here, we check for
+    # this case and, if possible, we block any unwanted usage.
+    #
+
+    OTHER_ARCHS=$(dpkg --print-foreign-architectures)
+    if [[ -n "$OTHER_ARCHS" ]]; then
+	echo "Multiarch support is enabled on this system."
+	echo "  dpkg arch  : $(dpkg --print-architecture)"
+	echo "  dpkg multi : $OTHER_ARCHS"
+	echo ""
+
+	HOLD=0
+	for ARCH in $OTHER_ARCHS; do
+	    if dpkg -l | grep -q -E "^ii\s+.+:$ARCH\s"; then
+		HOLD=$((HOLD + 1))
+	    fi
+	done
+
+	if [[ $HOLD -ne 0 ]]; then
+	    echo "Multi-arch packages are installed."
+	    echo ""
+	    return 1
+	fi
+
+	for ARCH in $OTHER_ARCHS; do
+	    echo "Removing [unused] multiarch support : $ARCH"
+	    ${SUDO} dpkg --remove-architecture $ARCH
+	done
+	echo ""
+
+	${SUDO} apt update
+    fi
+
+    return 0
+}
+
+preflight_testsuite()
+{
+    RC=0
+    check_executable /tmp || RC=$?
+    if [[ $RC -ne 0 ]]; then
+	echo "***"								1>&2
+	echo "*** The \"testsuite\" needs to exec scripts in \"/tmp\" and"	1>&2
+	echo "*** additional space is needed.  To resolve, you can comment"	1>&2
+	echo "*** out the \"/etc/fstab\" mount entry (and reboot)."		1>&2
+	echo "***"								1>&2
+	exit 1
+    fi
+
+    RC=0
+    check_multiarch || RC=$?
+    if [[ $RC -ne 0 ]]; then
+	echo "***"								1>&2
+	echo "*** Can't install the \"testsuite\" pre-requisite packages"	1>&2
+	echo "***"								1>&2
+	exit 1
+    fi
+}
+
 do_source()
 {
     # Make sure that we have a copy of the "asterisk" repo
@@ -682,8 +913,18 @@ do_source()
     # Make sure that we have a copy of the "asl3-asterisk" repo
     add_asl3-asterisk
 
+    # If testing, make sure that we have a copy of the Asterisk "testsuite" repo
+    if [[ $DO_TEST -ne 0 ]]; then
+	add_testsuite
+    fi
+
     # Create our merged build directory
-    create_build_directory
+    prepare_build_directory
+
+    # If testing, prepare for exec'ing the test suite
+    if [[ $DO_TEST -ne 0 ]]; then
+	prepare_testsuite_directory
+    fi
 }
 
 # ---------- ---------- ---------- ---------- ---------- ----------
@@ -757,6 +998,12 @@ do_package()
 
 # ---------- ---------- ---------- ---------- ---------- ----------
 
+echo ""
+
+if [[ $DO_TEST -ne 0 ]]; then
+    preflight_testsuite
+fi
+
 if [[ $DO_ZAP -gt 0 ]]; then
     do_zap
 fi
@@ -766,7 +1013,7 @@ if [[ $DO_SOURCE -gt 0 ]]; then
 fi
 
 if [[ $DO_CLEAN -gt 0 ]]; then
-    if [[ -d "${MERGE_DIR}" ]]; then
+    if [[ $MERGE_EMPTY -eq 0 ]]; then
         do_clean
     fi
 fi
