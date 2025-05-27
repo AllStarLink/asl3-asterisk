@@ -34,6 +34,10 @@ case "$1" in
 	perl -pi -e 's/^;sounds_search_custom_dir\s+=\s+no/sounds_search_custom_dir = yes/g' \
 		/etc/asterisk/asterisk.conf
 
+	# update the asterisk module directory path
+	perl -pi -e "s;/usr/lib/.*-linux-gnu/asterisk/modules;/usr/lib/`arch`-linux-gnu/asterisk/modules;" \
+		/etc/asterisk/asterisk.conf
+
 	# change insecure default passwords, if present
 	RAND_IAX=$(openssl rand -hex 16)
 	perl -pi -e "s/Your_Secret_Password_Here/${RAND_IAX}/g" \
