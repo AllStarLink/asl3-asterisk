@@ -246,6 +246,19 @@ else ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
 	ADDONS_ENABLE += DEBUG_THREADS
 endif
 
+# "testsuite"
+ifneq (,$(findstring testsuite,$(DEB_BUILD_OPTIONS)))
+	# build w/"testsuite"
+ 	CATEGORY_ENABLE += MENUSELECT_TESTS
+ 	ADDONS_ENABLE += TEST_FRAMEWORK
+# 	ADDONS_ENABLE += app_dial
+ 	ADDONS_ENABLE += app_originate
+# 	ADDONS_ENABLE += app_rpt
+ 	ADDONS_ENABLE += app_userevent
+#	ADDONS_ENABLE += chan_iax2
+#	ADDONS_ENABLE += pbx_config
+endif
+
 # make sure we have 'fetch' . We need to have either wget or fetch
 # on the system. However it is generally not a good idea to actually
 # get remote tarballs at build time. So if neither wget nor fetch
@@ -275,10 +288,10 @@ override_dh_auto_configure:
 	# Pre-configuration steps
 	@echo ""
 	@echo "DEB_BUILD_OPTIONS    : $(DEB_BUILD_OPTIONS)"
-	@echo "CATEGORY_ENABLE      : $(CATEGORY_ENABLE)"
 	@echo "CATEGORY_DISABLE     : $(CATEGORY_DISABLE)"
-	@echo "ADDONS_ENABLE        : $(ADDONS_ENABLE)"
+	@echo "CATEGORY_ENABLE      : $(CATEGORY_ENABLE)"
 	@echo "ADDONS_DISABLE       : $(ADDONS_DISABLE)"
+	@echo "ADDONS_ENABLE        : $(ADDONS_ENABLE)"
 	@echo "BUILDFLAGS           : $(BUILDFLAGS)"
 	@echo "EXTRA_CONFIGURE_OPTS : $(EXTRA_CONFIGURE_OPTS)"
 	@echo ""
@@ -294,9 +307,9 @@ override_dh_auto_configure:
 execute_before_dh_auto_build:
 	$(MAKE) menuselect.makeopts BUILD_CFLAGS="$(CFLAGS)" BUILD_LDFLAGS="$(LDFLAGS)"
 	for module in $(CATEGORY_DISABLE); do menuselect/menuselect --disable-category $$module menuselect.makeopts; done
-	for module in $(CATEGORY_ENABLE); do menuselect/menuselect --enable-category $$module menuselect.makeopts; done
-	for module in $(ADDONS_DISABLE); do menuselect/menuselect --disable $$module menuselect.makeopts; done
-	for module in $(ADDONS_ENABLE); do menuselect/menuselect --enable $$module menuselect.makeopts; done
+	for module in $(CATEGORY_ENABLE);  do menuselect/menuselect --enable-category $$module  menuselect.makeopts; done
+	for module in $(ADDONS_DISABLE);   do menuselect/menuselect --disable $$module          menuselect.makeopts; done
+	for module in $(ADDONS_ENABLE);    do menuselect/menuselect --enable $$module           menuselect.makeopts; done
 
 override_dh_auto_build:
 	$(FETCH_ENV) dh_auto_build -- $(BUILDFLAGS)

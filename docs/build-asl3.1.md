@@ -8,17 +8,18 @@ build-asl3 - Build ASL3 Asterisk + app\_rpt
 
 # SYNOPSIS
 
-Usage: `build-asl3 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-l] [-m MERGE_DIR] OPTIONS ACTIONS`
+Usage: `build-asl3 [-a ASTV] [-v RPTV] [-r RELV] [-d DESTDIR] [-t] [-l] [-m MERGE_DIR] [-x] OPTIONS ACTIONS`
 
 Options :
 
-* -a Asterisk version (default: installed (or latest) version, e.g. "22.2.0")
-* -v ASL/app\_rpt version (default: installed (or latest) version, e.g. "3.3.0")
-* -r  Release version (default: installed (or latest) version, e.g. "1")
-* -d  local install directory (default: "/")
+* -a Asterisk version (e.g. "22.2.0")
+* -v ASL/app\_rpt version (e.g. "3.3.0")
+* -r  Release version (e.g. "1")
+* -d  Local install directory (default: "/")
 * -l  Create merged source directory with symlinks
-* -m  merge directory path    (default: based on version #'s)
-* -x  compare source file content vs. modification dates
+* -m  Merge directory path    (default: based on version #'s)
+* -t  Setup test suite
+* -x  Compare source file content vs. modification dates
 
 OPTIONS (specify zero or more) :
 
@@ -36,11 +37,14 @@ ACTIONS (specify one or more) :
 * package - create Debian packages
 
 Note: specifying the "build", "install", or "package" actions will, if needed,
-create the merged source directory.
+      create the merged source directory.
 
 Note: the Asterisk, ASL/app\_rpt, and Release versions will default to those
-of the "asl3-asterisk" package.  You can also use the "AST\_VER", "RPT\_VER",
-and "REL\_VER" environment variables to specify the versions.
+      of the currently downloaded source code directories.  If the source
+      directories are not yet available then the version numbers will be
+      derived from the currently installed "asl3-asterisk" package.  You 
+      can also use the "AST\_VER", "RPT\_VER", and "REL\_VER" environment 
+      variables to specify the versions.
 
 # DESCRIPTION
 
@@ -59,11 +63,13 @@ When using the `build-asl3` command your system works with the following directo
 <base directory>
   asl3-asterisk-AST_VER+asl3-ASL_VER
   asterisk
-  app\_rpt
+  app_rpt
   asl3-asterisk
 ```
 
-The "asterisk", "app\_rpt", and "asl3-asterisk" directories contain the source code used to build ASL3 asterisk + app\_rpt.  The `build-asl3` script merges these 3 projects together into a single source directory, "asl3-asterisk-AST\_VER+asl3-ASL\_VER", that is used for building.
+The "asterisk", "app\_rpt", and "asl3-asterisk" directories contain the source code used to build ASL3 asterisk + app\_rpt.  The `build-asl3` script merges these 3 projects together into a single "merged" source directory, "asl3-asterisk-AST\_VER+asl3-ASL\_VER", that is used for building.
+
+If the "-t" option is specified then Asterisk test suite (with app\_rpt extras) will be included in the build.  This option also changes to the directory hierarchy.  First, `build-asl3` looks to the "testsuite" source code directory in the "\<base directory>".  Secondly, the "merged" directory for ASL3 asterisk + app\_rpt and one for the test suite will be located in the "/usr/src" directory.
 
 Any Debian packages created by `build-asl3` will also be stored in the "\<base directory>".
 
@@ -189,5 +195,5 @@ Report bugs to https://github.com/AllStarLink/ASL3/issues
 
 # COPYRIGHT
 
-Copyright (C) 2024 Allan Nathanson and AllStarLink
+Copyright (C) 2024 - 2025 Allan Nathanson and AllStarLink
 under the terms of the AGPL v3.
