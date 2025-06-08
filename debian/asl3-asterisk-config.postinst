@@ -17,7 +17,7 @@ case "$1" in
 
 	# find conffiles under /etc/asterisk belonging to asterisk-config
 	# and chown them to user asterisk.
-	dpkg-query -W -f='${Conffiles}\n' asterisk-config 2>/dev/null | \
+	dpkg-query -W -f='${Conffiles}\n' asl3-asterisk-config 2>/dev/null | \
 	  sed -nr -e 's; (/etc/asterisk/.*) [0-9a-f]*;\1;p' | \
 	while read conffile; do
 		chown asterisk: ${conffile} 2>/dev/null
