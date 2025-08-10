@@ -49,7 +49,7 @@ while [[ $# -gt 0 ]]; do
 	  shift
 	  ;;
 	--repo)
-	  APTLY_REPO="asl3-$2"
+	  REPO_LEVEL="$2"
 	  shift
       shift
       ;;
@@ -97,10 +97,13 @@ else
   REPO_ENV=""
 fi
 
+APTLY_REPO="asl3-${OPERATING_SYSTEMS}-${REPO_LEVEL}"
+
 ## Need to clean this up to be more elegant
 echo "Architectures: $ARCH"
 echo "Targets: $TARGETS"
 echo "Operating Systems: $OPERATING_SYSTEMS"
+echo "Aptly Repo: ${APTLY_REPO}"
 echo "PWD: $(pwd)"
 echo "BS: ${BASH_SOURCE[0]}"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -118,7 +121,7 @@ git config --system user.email "builder@allstarlink.org"
 
 cd $ALL_PKG_ROOT
 
-D_TAG="asl3-asterisk_builder.${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
+D_TAG="$(echo "${GH_REPO_NAME}" | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]').${OPERATING_SYSTEMS}.${ARCH}${REPO_ENV}"
 
 docker build -f $DIR/Dockerfile -t $D_TAG \
 	--build-arg ARCH="$ARCH" \

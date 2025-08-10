@@ -14,7 +14,8 @@ RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID user; 
 
 # Install build dependencies
 RUN apt-get update && apt-get -y install \
-	apt-utils build-essential devscripts fakeroot debhelper git \
+	apt-utils build-essential devscripts fakeroot debhelper git lsb-release \
+	libterm-readline-gnu-perl  libterm-readline-perl-perl libdistro-info-perl \
     gh ca-certificates wget --no-install-recommends
 
 # Install application dependencies
@@ -31,7 +32,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install  \
  libssl-dev libswscale-dev libsystemd-dev libtonezone-dev libunbound-dev  \
  liburiparser-dev libusb-dev libvo-amrwbenc-dev libvorbis-dev libxml2-dev  \
  libxslt1-dev perl portaudio19-dev subversion unixodbc-dev  \
- uuid-dev zlib1g-dev devscripts lsb-release  --no-install-recommends 
+ uuid-dev zlib1g-dev devscripts --no-install-recommends 
 
 # Import entrypoint script
 COPY ./entrypoint.sh /entrypoint.sh
