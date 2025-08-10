@@ -25,4 +25,5 @@ config_c_fix_template_writing.patch
 sounds_ulaw_default
 enable_custom_sounddir.patch
 #chan_iax2_unknown_format.patch
-#file_c_search_custom_dir_no_warnings
+#file_c_search_custom_dir_no_warnings.patch
+file_c_search_custom_sounds.patch
