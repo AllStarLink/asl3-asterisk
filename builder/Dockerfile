@@ -22,7 +22,7 @@ RUN apt-get update && apt-get -y install \
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install  \
  autoconf automake binutils-dev cmark-gfm dahdi-source debhelper-compat  \
  default-libmysqlclient-dev freetds-dev libasound2-dev libavcodec-dev libavdevice-dev  \
- libbluetooth-dev libc-client2007e-dev libcap-dev libcodec2-dev libcurl4-openssl-dev  \
+ libbluetooth-dev libcap-dev libcodec2-dev libcurl4-openssl-dev  \
  libedit-dev libfftw3-dev libgmime-3.0-dev libgsm1-dev libical-dev libiksemel-dev  \
  libjack-dev libjansson-dev libldap-dev liblua5.1-dev libncurses-dev libneon27-dev  \
  libnewt-dev libogg-dev libopencore-amrnb-dev libopencore-amrwb-dev libopenr2-dev libopus-dev  \
