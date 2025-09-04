@@ -218,9 +218,9 @@ if [[ ! -d "${MERGE_DIR}" ]]; then
     # directory does not exist
     MERGE_EMPTY=1
 else
-    find "${MERGE_DIR}" -mindepth 1 -maxdepth 1 -printf '%f\n' | grep -qv '^\.PREREQ_INSTALLED$'
+    find "${MERGE_DIR}" -mindepth 1 -maxdepth 1 ! -name '.PREREQ_INSTALLED' -print -quit >/dev/null
     if [[ $? -ne 0 ]]; then
-	# did NOT find any file other than .PREREQ_INSTALLED
+	# did NOT find any files other than .PREREQ_INSTALLED
 	MERGE_EMPTY=1
     fi
 fi
