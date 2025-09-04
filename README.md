@@ -15,7 +15,7 @@ https://salsa.debian.org/pkg-voip-team/asterisk.
 This repository is structured to track the Asterisk 22 LTS
 release from the Asterisk project.
 
-In general, this repo is used exclsively for the AllStarLink
+In general, this repo is used exclusively for the AllStarLink
 project to build the asterisk-related packages via
 GitHub and is not for general consumption. Feel free to
 fork and use as desired but this project will generally not
