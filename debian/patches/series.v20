@@ -22,6 +22,7 @@
 #config_c_fix_whitespace.patch
 #config_c_fix_missing_include_crash.patch
 config_c_fix_ast_variable_update.patch
+config_c_fix_deep_wide_templates.patch
 sounds_ulaw_default
 enable_custom_sounddir.patch
 #chan_iax2_unknown_format.patch
