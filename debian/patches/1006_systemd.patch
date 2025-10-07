@@ -103,6 +103,9 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 +StandardOutput=null
 +StandardError=null
 +
++# Allow asterisk to bind to port below 1025 (e.g. chan_voter)
++AmbientCapabilities=CAP_NET_BIND_SERVICE
++
 +# Extra settings:
 +# If you want to set them, you can add them to a file in the directory
 +# /lib/systemd/system/asterisk.service.d/ with the extension .conf.
