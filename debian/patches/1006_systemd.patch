@@ -82,7 +82,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 +fi
 --- /dev/null
 +++ b/contrib/asterisk.service
-@@ -0,0 +1,55 @@
+@@ -0,0 +1,58 @@
 +[Unit]
 +Description=Asterisk PBX
 +Documentation=man:asterisk(8)
@@ -103,7 +103,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 +StandardOutput=null
 +StandardError=null
 +
-+# Allow asterisk to bind to port below 1025 (e.g. chan_voter)
++# Allow asterisk to bind to port below 1024 (e.g. chan_voter)
 +AmbientCapabilities=CAP_NET_BIND_SERVICE
 +
 +# Extra settings:
