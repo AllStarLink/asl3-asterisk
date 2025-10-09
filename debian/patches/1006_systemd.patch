@@ -82,7 +82,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 +fi
 --- /dev/null
 +++ b/contrib/asterisk.service
-@@ -0,0 +1,55 @@
+@@ -0,0 +1,56 @@
 +[Unit]
 +Description=Asterisk PBX
 +Documentation=man:asterisk(8)

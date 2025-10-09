@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 KVER=$(uname -r)
-DAHDI_INSTALLED=$(lsmod | grep -E '^dahdi' | wc -l)
+DAHDI_INSTALLED=$(lsmod | grep -E '^(dahdi|dahdi_dummy|dahdi_transcode) ' | wc -l)
 
 # If there are 3 DADHI modules - dahdi, dahdi_dummy, dahdi_transcode
 # then DAHDI is installed and working for the current kernel.
