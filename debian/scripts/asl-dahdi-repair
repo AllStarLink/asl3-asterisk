@@ -1,0 +1,34 @@
+#!/usr/bin/bash
+
+KVER=$(uname -r)
+DAHDI_INSTALLED=$(lsmod | grep -E '^(dahdi|dahdi_dummy|dahdi_transcode) ' | wc -l)
+
+# If there are 3 DADHI modules - dahdi, dahdi_dummy, dahdi_transcode
+# then DAHDI is installed and working for the current kernel.
+if [ ${DAHDI_INSTALLED} == 3 ]; then
+	exit 0
+fi
+
+# Is the kernel headers installed?
+export DEBIAN_FRONTEND=noninteractive
+KHDRS=$(dpkg -l | awk '{print $2}' | grep linux-headers-${KVER} | wc -l)
+if [ ${KHDRS} == 0 ]; then
+	echo "========== Installing linux-headers-${KVER} =========="
+	apt update > /dev/null 2&>1
+	apt -qy install linux-headers-${KVER}
+	echo "========== Done =========="
+fi
+
+echo "========== Building DAHDI with DKMS ==========="
+DVER=$(dpkg -l | grep dahdi-dkms | awk '{print $3}' | perl -pe 's/^?[0-9]+:?([0-9\.]+)\-.*$/$1/g')
+dkms build -m dahdi -v ${DVER} -k $(uname -r) --force
+dkms install -m dahdi -v ${DVER} -k $(uname -r) --force
+
+for k in dahdi dahdi_transcode dahdi_dummy
+do
+	modprobe $k
+done
+
+echo "========== Done =========="
+
+exit 0
