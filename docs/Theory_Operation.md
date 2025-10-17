@@ -32,7 +32,7 @@ git clone git@github.com:AllStarLink/app_rpt.git
 
 4. Execute the `build-tree` process. For example:
 ``` 
-asl3-asterisk/build-tree -a 22.5.2 -v 3.6.0 -r 1
+asl3-asterisk/build-tree -a 22.5.2 -v 3.6.1 -r 1
 ```
 See [Building Debs](https://allstarlink.github.io/developers/package-builds/) for information
 on what to supply for `-a`, `-v`, and `-r`.
