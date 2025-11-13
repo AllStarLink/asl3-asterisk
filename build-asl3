@@ -344,14 +344,27 @@ done
 
 case "${AST_VER}" in
     20.* )
-	QUILT_SERIES="debian/patches/series.v20"
-	;;
-    22.[67].* )
-	QUILT_SERIES="debian/patches/series.v22.6"
-	;;
+		QUILT_SERIES="debian/patches/series.v20"
+		;;
+    22.* )
+		case "${AST_VER}" in
+    		22.[0-5].* )
+				QUILT_SERIES="debian/patches/series.v22.0"
+				;;
+    		* )
+				QUILT_SERIES="debian/patches/series.v22.6"
+				;;
+		esac
+		;;
+    23.* )
+		QUILT_SERIES="debian/patches/series.v23.0"
+		;;
     * )
-	QUILT_SERIES="debian/patches/series"
-	;;
+		echo "***"							1>&2
+		echo "*** Unsupported Asterisk version"	1>&2
+		echo "***"							1>&2
+		exit 1
+		;;
 esac
 
 if [[ -n $DO_DEBUG ]]; then
