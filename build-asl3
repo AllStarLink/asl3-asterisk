@@ -346,7 +346,7 @@ case "${AST_VER}" in
     20.* )
 	QUILT_SERIES="debian/patches/series.v20"
 	;;
-    22.6.* )
+    22.[67].* )
 	QUILT_SERIES="debian/patches/series.22.6"
 	;;
     * )
