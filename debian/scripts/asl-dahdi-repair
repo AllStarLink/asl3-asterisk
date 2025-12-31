@@ -14,8 +14,12 @@ export DEBIAN_FRONTEND=noninteractive
 KHDRS=$(dpkg -l | awk '{print $2}' | grep linux-headers-${KVER} | wc -l)
 if [ ${KHDRS} == 0 ]; then
 	echo "========== Installing linux-headers-${KVER} =========="
-	apt update > /dev/null 2&>1
-	apt -qy install linux-headers-${KVER}
+	if fuser -s /var/lib/dpkg/lock || fuser -s /var/lib/dpkg/lock-frontend || pgrep -x dpkg >/dev/null || pgrep -x apt >/dev/null || pgrep -x apt-get >/dev/null; then
+		echo "Skipping install; apt/dpkg transaction in progress elsewhere"
+	else
+		apt update > /dev/null 2>&1
+		apt -qy install linux-headers-${KVER}
+	fi
 	echo "========== Done =========="
 fi
 
