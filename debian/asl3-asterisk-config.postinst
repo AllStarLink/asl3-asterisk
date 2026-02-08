@@ -15,6 +15,11 @@ case "$1" in
     configure)
 	set +e # ignore errors temporarily
 
+	# set /etc/asterisk/custom dir ownership
+	if [ -d /etc/asterisk/custom ]; then
+		chown asterisk: /etc/asterisk/custom
+	fi
+
 	# find conffiles under /etc/asterisk belonging to asterisk-config
 	# and chown them to user asterisk.
 	dpkg-query -W -f='${Conffiles}\n' asl3-asterisk-config 2>/dev/null | \
