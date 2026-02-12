@@ -1,5 +1,102 @@
 #! /bin/sh
 
+require_module()
+{
+    module="$1"
+    module_re=$(printf '%s' "$module" | sed 's/\./\\./g')
+    re1="^[[:blank:]]*(load|noload|require)[[:blank:]]*=[[:blank:]]*${module_re}([[:blank:]]*(;.*)?)?[[:blank:]]*$"
+    re2="^[[:blank:]]*(load|require)[[:blank:]]*=[[:blank:]]*${module_re}([[:blank:]]*(;.*)?)?[[:blank:]]*$"
+
+    grep -E "$re1" /etc/asterisk/modules.conf | tail -n 1 | grep -E -q "$re2"
+    if [ $? -ne 0 ]; then
+	printf 'require = %s\n' "$module" >> /etc/asterisk/modules.conf
+    fi
+}
+
+update_asl_configuration()
+{
+    # Update "modules.conf" to use non-DAHDI bridging
+    perl -0 -pi -e '
+	s{
+	    (^load[[:blank:]]*=[[:blank:]]*app_transfer\.so(?:[[:blank:]][^\n]*)?\n)
+	    ^[[:blank:]]*\n
+	    ^;[[:blank:]]*Channel[[:blank:]]+Drivers\n
+	    ^[[:blank:]]*\n
+	}{
+	    $1 .
+	    "\n" .
+	    "; Bridging\n" .
+	    "\n" .
+	    "require = bridge_softmix.so              ; Multi-party software based channel mixing\n" .
+	    "\n" .
+	    "; Channel Drivers\n" .
+	    "\n"
+	}gmxe;
+	s{
+	    ^;[[:blank:]]*Channel[[:blank:]]+Drivers\n
+	    ^[[:blank:]]*\n
+	    ^(load|noload|require)[[:blank:]]*=[[:blank:]]*chan_dahdi\.so(?:[[:blank:]][^\n]*)?\n
+	}{
+	    "; Channel Drivers\n" .
+	    "\n" .
+	    "require = chan_bridge_media.so           ; Bridge Media Channel Driver\n" .
+	    "noload  = chan_dahdi.so                  ; DAHDI Telephony w/PRI & SS7 & MFC/R2\n"
+	}gmxe;
+	s{
+	    ^(load|noload|require)[[:blank:]]*=[[:blank:]]*chan_dahdi\.so(?:[[:blank:]][^\n]*)?\n
+	}{
+	    "noload  = chan_dahdi.so                  ; DAHDI Telephony w/PRI & SS7 & MFC/R2\n"
+	}gmxe;
+	s{
+	    ^(load|noload|require)[[:blank:]]*=[[:blank:]]*res_timing_dahdi\.so(?:[[:blank:]][^\n]*)?\n
+	}{
+	    "noload  = res_timing_dahdi.so            ; DAHDI Timing Interface\n"
+	}gmxe;
+	s{
+	    ^;load[[:blank:]]*=[[:blank:]]*bridge_softmix\.so(?:[[:blank:]][^\n]*)?\n
+	}{}gmx;
+	s{
+	    ^;load[[:blank:]]*=[[:blank:]]*chan_bridge_media\.so(?:[[:blank:]][^\n]*)?\n
+	}{}gmx;
+    ' /etc/asterisk/modules.conf
+
+    require_module "bridge_softmix.so"
+    require_module "chan_bridge_media.so"
+
+    # Update "rpt.conf" to use non-DAHDI bridging
+    perl -pi -e '
+	s;dahdi/pseudo;Local/pseudo;g
+    ' /etc/asterisk/rpt.conf
+
+    # Update "extensions.conf" to use non-DAHDI bridging
+    perl -0 -pi -e '
+	s{
+	    ^\[pstn-out\]\n
+	    ^exten[[:blank:]]*=>[[:blank:]]*_NXXNXXXXXX,1,playback\(ss-noservice\)\n
+	    ^[[:blank:]]+same[[:blank:]]*=>[[:blank:]]*n,Congestion\n
+	    ^[[:blank:]]*\n
+	}{
+	    "[pstn-out]\n" .
+	    "exten => _NXXNXXXXXX,1,Wait(1)\n" .
+	    "	same => n,Playback(ss-noservice)\n" .
+	    "	same => n,Hangup\n" .
+	    "\n"
+	}gmsxe;
+	s{
+	    ^;\[pstn-out\]\n
+	    ;exten[[:blank:]]*=>[[:blank:]]*_NXXNXXXXXX,1,Dial\(IAX2/allstar-autopatch/\\\$\{EXTEN\}\)\n
+	    ;[[:blank:]]+same[[:blank:]]*=>[[:blank:]]*n,Busy\n
+	    [[:blank:]]*\n
+	}{
+	    ";[pstn-out]\n" .
+	    ";exten => _NXXNXXXXXX,1,Wait(1)\n" .
+	    ";	same => n, Dial(IAX2/allstar-autopatch/\${EXTEN})\n" .
+	    ";	same => n,Busy\n" .
+	    "\n"
+	}gmxe;
+    ' /etc/asterisk/extensions.conf
+}
+
 set -e
 
 # summary of how this script can be called:
@@ -45,7 +142,14 @@ case "$1" in
 	perl -pi -e "s/Your_Secret_Pasword_Here/${RAND_IAX}/g" \
 		/etc/asterisk/iax.conf
 
-set -e
+	# update the configuration files to use asterisk (non-DAHDI) bridging
+	pkg_ver="$(dpkg-query -W -f='${Version}\n' asl3-asterisk 2>/dev/null || echo "")"
+	asl_ver="$(printf '%s\n' "$pkg_ver" | sed -n 's/.*+asl3-\([^-]*\)-.*/\1/p')"
+	if [ -n "$asl_ver" ] && dpkg --compare-versions "$asl_ver" ge "3.8.0"; then
+		update_asl_configuration
+	fi
+
+	set -e
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
