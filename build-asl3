@@ -351,8 +351,11 @@ case "${AST_VER}" in
     		22.[0-5].* )
 				QUILT_SERIES="debian/patches/series.v22.0"
 				;;
-    		* )
+			22.[67].* )
 				QUILT_SERIES="debian/patches/series.v22.6"
+				;;
+    		* )
+				QUILT_SERIES="debian/patches/series.v22.8"
 				;;
 		esac
 		;;
@@ -361,8 +364,11 @@ case "${AST_VER}" in
     		23.0.* )
 				QUILT_SERIES="debian/patches/series.v23.0"
 				;;
-    		* )
+    		23.1.* )
 				QUILT_SERIES="debian/patches/series.v23.1"
+				;;
+    		* )
+				QUILT_SERIES="debian/patches/series.v23.2"
 				;;
 		esac
 		;;
