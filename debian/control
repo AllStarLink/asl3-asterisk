@@ -93,6 +93,7 @@ Depends:
  asl3-asterisk-modules (= ${binary:Version}),
  ${misc:Depends},
  ${shlibs:Depends},
+ ${dahdi:Depends},
 Pre-Depends:
  ${misc:Pre-Depends},
 Provides:

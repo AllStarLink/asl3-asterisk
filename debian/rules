@@ -343,9 +343,16 @@ execute_before_dh_clean:
 	[ ! -f configure.debian_sav ] || mv configure.debian_sav configure
 
 override_dh_gencontrol:
-	AST_BUILDOPT_SUM=$$(grep AST_BUILDOPT_SUM include/asterisk/buildopts.h  \
+	AST_BUILDOPT_SUM=$$(grep AST_BUILDOPT_SUM include/asterisk/buildopts.h \
 		| sed -e 's/.\+ "\(.\+\)\"/\1/g'); \
-		dh_gencontrol -- -Vasterisk:ABI=$$AST_BUILDOPT_SUM
+	DAHDI_DEP=''; \
+	if grep -Eq '^[[:space:]]*(load|require)[[:space:]]*=[[:space:]]*.*chan_dahdi\.so([[:space:]]*($$|;|#).*)?$$' \
+		configs/asl3/modules.conf 2>/dev/null; then \
+		DAHDI_DEP='dahdi-linux, dahdi-dkms (>= 3.4.0-6)'; \
+	fi; \
+	dh_gencontrol -- \
+		-Vasterisk:ABI=$$AST_BUILDOPT_SUM \
+		-Vdahdi:Depends="$$DAHDI_DEP"
 
 REMOVED_PROTO_CONFS = dundi unistim
 REMOVED_PROTO_FILES = $(REMOVED_PROTO_CONFS:%=debian/tmp/etc/asterisk/%.conf)
