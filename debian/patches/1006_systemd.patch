@@ -82,7 +82,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 +fi
 --- /dev/null
 +++ b/contrib/asterisk.service
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,58 @@
 +[Unit]
 +Description=Asterisk PBX
 +Documentation=man:asterisk(8)
@@ -91,8 +91,6 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 +
 +[Service]
 +Type=notify
-+TimeoutStartSec=600s
-+ExecStartPre=/usr/bin/asl-dahdi-repair
 +ExecStart=__ASTERISK_SBIN_DIR__/asterisk -g -f -p -U asterisk
 +ExecReload=__ASTERISK_SBIN_DIR__/asterisk -rx 'core reload'
 +Restart=on-failure
