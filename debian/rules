@@ -374,7 +374,7 @@ execute_after_dh_auto_install:
 	$(RM) -f debian/tmp/usr/sbin/stereorize
 	$(RM) -f debian/tmp/usr/sbin/hashtest*
 	$(RM) -f debian/tmp/usr/sbin/refcounter
-	cp configs/asl3/* debian/tmp/etc/asterisk/
+	cp -r configs/asl3/* debian/tmp/etc/asterisk/
 	$(RM) -f debian/tmp/etc/asterisk/users.conf
 	mkdir -p debian/tmp/usr/share/asterisk/sounds/en/rpt
 	cp rpt-sounds/* debian/tmp/usr/share/asterisk/sounds/en/rpt
