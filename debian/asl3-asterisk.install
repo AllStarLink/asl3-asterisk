@@ -1,7 +1,6 @@
 etc/logrotate.d/*
 lib/systemd/system/asterisk.service
 usr/bin/asterisk-config-custom
-usr/bin/asl-dahdi-repair
 usr/lib/${DEB_HOST_MULTIARCH}/libasterisk*
 usr/sbin
 usr/share/asterisk/conf
@@ -12,7 +11,6 @@ usr/share/asterisk/phoneprov
 usr/share/asterisk/rest-api
 usr/share/asterisk/moh
 usr/share/asterisk/sounds
-usr/share/dahdi/span_config.d/50-asterisk
 etc/modules-load.d/*.conf
 etc/udev/rules.d/*.rules
 var/lib/asterisk/scripts/*
