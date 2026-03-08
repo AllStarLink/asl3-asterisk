@@ -39,7 +39,6 @@ apt -y install  autoconf \
  libopusfile-dev \
  libpopt-dev \
  libpq-dev \
- libpri-dev \
  libradcli-dev \
  libreadline-dev \
  libresample1-dev \
@@ -51,12 +50,9 @@ apt -y install  autoconf \
  libspeexdsp-dev \
  libsqlite3-dev \
  libsrtp2-dev \
- libss7-dev \
  libssl-dev \
  libswscale-dev \
  libsystemd-dev \
- libtonezone-dev\
- libtonezone2.0 \
  libunbound-dev \
  liburiparser-dev \
  libvo-amrwbenc-dev \

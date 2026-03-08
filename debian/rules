@@ -106,7 +106,6 @@ ifneq (,$(findstring thin,$(DEB_BUILD_OPTIONS)))
 	ADDONS_ENABLE += app_system
 	ADDONS_ENABLE += app_transfer
 	# Channel Drivers
-	ADDONS_ENABLE += chan_dahdi
 	ADDONS_ENABLE += chan_echolink
 	ADDONS_ENABLE += chan_iax2
 	ADDONS_ENABLE += chan_mobile
@@ -120,7 +119,6 @@ ifneq (,$(findstring thin,$(DEB_BUILD_OPTIONS)))
 	ADDONS_ENABLE += codec_a_mu
 	ADDONS_ENABLE += codec_adpcm
 	ADDONS_ENABLE += codec_alaw
-	ADDONS_ENABLE += codec_dahdi
 	ADDONS_ENABLE += codec_g722
 	ADDONS_ENABLE += codec_g726
 	ADDONS_ENABLE += codec_gsm
@@ -167,7 +165,6 @@ ifneq (,$(findstring thin,$(DEB_BUILD_OPTIONS)))
 	ADDONS_ENABLE += res_crypto
 	ADDONS_ENABLE += res_curl
 	ADDONS_ENABLE += res_rpt_http_registrations
-	ADDONS_ENABLE += res_timing_dahdi
 	ADDONS_ENABLE += res_timing_timerfd
 	ADDONS_ENABLE += res_usbradio
 	# SIP, Autopatch
@@ -371,10 +368,8 @@ execute_after_dh_auto_install:
 	$(RM) -f $(REMOVED_PROTO_FILES)
 	mkdir -p debian/tmp/usr/bin/
 	mkdir -p debian/tmp/usr/share/man/man1
-	mkdir -p debian/tmp/usr/share/dahdi/span_config.d
 	cp -a debian/asterisk-config-custom debian/tmp/usr/bin/
 	cp -a debian/asterisk-config-custom.1 debian/tmp/usr/share/man/man1/
-	cp -a debian/50-asterisk debian/tmp/usr/share/dahdi/span_config.d/
 	$(RM) -f debian/tmp/usr/sbin/conf2ael
 	$(RM) -f debian/tmp/usr/sbin/muted
 	$(RM) -f debian/tmp/usr/sbin/streamplayer
@@ -389,7 +384,6 @@ execute_after_dh_auto_install:
 	install -D -m 644 etc/90-asl3.rules debian/tmp/etc/udev/rules.d/90-asl3.rules
 	install -D -m 644 debian/asterisk.logrotate debian/tmp/etc/logrotate.d/asterisk
 	install -D -m 755 contrib/scripts/ast_coredumper debian/tmp/var/lib/asterisk/scripts/ast_coredumper
-	install -D -m 755 debian/scripts/asl-dahdi-repair debian/tmp/usr/bin/asl-dahdi-repair
 
 #execute_after_dh_install-arch:
 #	extra_packs=$$(find $(SUBPACKS_EXTRA_DIRS_MOD) -name '*.so' -printf '%f\n');\
