@@ -106,6 +106,7 @@ ifneq (,$(findstring thin,$(DEB_BUILD_OPTIONS)))
 	ADDONS_ENABLE += app_system
 	ADDONS_ENABLE += app_transfer
 	# Channel Drivers
+	ADDONS_DISABLE += chan_dahdi
 	ADDONS_ENABLE += chan_echolink
 	ADDONS_ENABLE += chan_iax2
 	ADDONS_ENABLE += chan_mobile
@@ -119,6 +120,7 @@ ifneq (,$(findstring thin,$(DEB_BUILD_OPTIONS)))
 	ADDONS_ENABLE += codec_a_mu
 	ADDONS_ENABLE += codec_adpcm
 	ADDONS_ENABLE += codec_alaw
+	ADDONS_DISABLE += codec_dahdi
 	ADDONS_ENABLE += codec_g722
 	ADDONS_ENABLE += codec_g726
 	ADDONS_ENABLE += codec_gsm
@@ -165,6 +167,7 @@ ifneq (,$(findstring thin,$(DEB_BUILD_OPTIONS)))
 	ADDONS_ENABLE += res_crypto
 	ADDONS_ENABLE += res_curl
 	ADDONS_ENABLE += res_rpt_http_registrations
+	ADDONS_DISABLE += res_timing_dahdi
 	ADDONS_ENABLE += res_timing_timerfd
 	ADDONS_ENABLE += res_usbradio
 	# SIP, Autopatch
