@@ -5,7 +5,6 @@ apt -y install  autoconf \
  automake \
  binutils-dev \
  cmark-gfm \
- dahdi-source \
  debhelper-compat \
  devscripts \
  default-libmysqlclient-dev \
@@ -34,7 +33,6 @@ apt -y install  autoconf \
  libogg-dev \
  libopencore-amrnb-dev \
  libopencore-amrwb-dev \
- libopenr2-dev \
  libopus-dev \
  libopusfile-dev \
  libpopt-dev \
