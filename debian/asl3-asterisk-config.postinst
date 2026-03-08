@@ -4,8 +4,8 @@ require_module()
 {
     module="$1"
     module_re=$(printf '%s' "$module" | sed 's/\./\\./g')
-    re1="^[[:blank:]]*(load|noload|require)[[:blank:]]*=[[:blank:]]*${module_re}([[:blank:]]*(;.*)?)?[[:blank:]]*$"
-    re2="^[[:blank:]]*(load|require)[[:blank:]]*=[[:blank:]]*${module_re}([[:blank:]]*(;.*)?)?[[:blank:]]*$"
+    re1="^[[:blank:]]*(load|noload|require)[[:blank:]]*=>?[[:blank:]]*${module_re}([[:blank:]]*(;.*)?)?[[:blank:]]*$"
+    re2="^[[:blank:]]*(load|require)[[:blank:]]*=>?[[:blank:]]*${module_re}([[:blank:]]*(;.*)?)?[[:blank:]]*$"
 
     grep -E "$re1" /etc/asterisk/modules.conf | tail -n 1 | grep -E -q "$re2"
     if [ $? -ne 0 ]; then
@@ -18,7 +18,7 @@ update_asl_configuration()
     # Update "modules.conf" to use non-DAHDI bridging
     perl -0 -pi -e '
 	s{
-	    (^load[[:blank:]]*=[[:blank:]]*app_transfer\.so(?:[[:blank:]][^\n]*)?\n)
+	    (^load[[:blank:]]*=>?[[:blank:]]*app_transfer\.so(?:[[:blank:]][^\n]*)?\n)
 	    ^[[:blank:]]*\n
 	    ^;[[:blank:]]*Channel[[:blank:]]+Drivers\n
 	    ^[[:blank:]]*\n
@@ -35,7 +35,7 @@ update_asl_configuration()
 	s{
 	    ^;[[:blank:]]*Channel[[:blank:]]+Drivers\n
 	    ^[[:blank:]]*\n
-	    ^(load|noload|require)[[:blank:]]*=[[:blank:]]*chan_dahdi\.so(?:[[:blank:]][^\n]*)?\n
+	    ^(load|noload|require)[[:blank:]]*=>?[[:blank:]]*chan_dahdi\.so(?:[[:blank:]][^\n]*)?\n
 	}{
 	    "; Channel Drivers\n" .
 	    "\n" .
@@ -43,20 +43,23 @@ update_asl_configuration()
 	    "noload  = chan_dahdi.so                  ; DAHDI Telephony w/PRI & SS7 & MFC/R2\n"
 	}gmxe;
 	s{
-	    ^(load|noload|require)[[:blank:]]*=[[:blank:]]*chan_dahdi\.so(?:[[:blank:]][^\n]*)?\n
+	    ^(load|noload|require)[[:blank:]]*=>?[[:blank:]]*chan_dahdi\.so(?:[[:blank:]][^\n]*)?\n
 	}{
 	    "noload  = chan_dahdi.so                  ; DAHDI Telephony w/PRI & SS7 & MFC/R2\n"
 	}gmxe;
 	s{
-	    ^(load|noload|require)[[:blank:]]*=[[:blank:]]*res_timing_dahdi\.so(?:[[:blank:]][^\n]*)?\n
+	    ^(load|noload|require)[[:blank:]]*=>?[[:blank:]]*res_timing_dahdi\.so(?:[[:blank:]][^\n]*)?\n
 	}{
 	    "noload  = res_timing_dahdi.so            ; DAHDI Timing Interface\n"
 	}gmxe;
 	s{
-	    ^;load[[:blank:]]*=[[:blank:]]*bridge_softmix\.so(?:[[:blank:]][^\n]*)?\n
+	    ^\[global\](?:[[:blank:]][^\n]*)?\n
 	}{}gmx;
 	s{
-	    ^;load[[:blank:]]*=[[:blank:]]*chan_bridge_media\.so(?:[[:blank:]][^\n]*)?\n
+	    ^;load[[:blank:]]*=>?[[:blank:]]*bridge_softmix\.so(?:[[:blank:]][^\n]*)?\n
+	}{}gmx;
+	s{
+	    ^;load[[:blank:]]*=>?[[:blank:]]*chan_bridge_media\.so(?:[[:blank:]][^\n]*)?\n
 	}{}gmx;
     ' /etc/asterisk/modules.conf
 
