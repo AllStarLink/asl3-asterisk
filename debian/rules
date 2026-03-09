@@ -348,7 +348,7 @@ override_dh_gencontrol:
 	DAHDI_DEP=''; \
 	if grep -Eq '^[[:space:]]*(load|require)[[:space:]]*=[[:space:]]*.*chan_dahdi\.so([[:space:]]*($$|;|#).*)?$$' \
 		configs/asl3/modules.conf 2>/dev/null; then \
-		DAHDI_DEP='dahdi-linux, dahdi-dkms (>= 3.4.0-6)'; \
+		DAHDI_DEP='dahdi-linux (>= 3.4.0-11), dahdi-source (>= 3.4.0-11) | dahdi-dkms (>= 3.4.0-11)'; \
 	fi; \
 	dh_gencontrol -- \
 		-Vasterisk:ABI=$$AST_BUILDOPT_SUM \
