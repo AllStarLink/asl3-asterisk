@@ -90,7 +90,7 @@ case "$1" in
 	done
 
 	# load the modules we care about
-	modprobe -aq dahdi snd-pcm-oss
+	modprobe -aq snd-pcm-oss
 
 	# remove customized /etc/systemd/system/asterisk.service
 	test -f /etc/systemd/system/asterisk.service && \
