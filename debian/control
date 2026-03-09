@@ -59,6 +59,7 @@ Build-Depends:
  libssl-dev,
  libswscale-dev,
  libsystemd-dev [linux-any],
+ libtonezone-dev [linux-any],
  libunbound-dev,
  liburiparser-dev,
  libusb-dev,

@@ -29,7 +29,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install  \
  libopusfile-dev libpopt-dev libpq-dev libradcli-dev libreadline-dev  \
  libresample1-dev libsdl-image1.2-dev libsndfile1-dev libsnmp-dev libspandsp-dev  \
  libspeex-dev libspeexdsp-dev libsqlite3-dev libsrtp2-dev  \
- libssl-dev libswscale-dev libsystemd-dev libunbound-dev  \
+ libssl-dev libswscale-dev libsystemd-dev libtonezone-dev libunbound-dev  \
  liburiparser-dev libusb-dev libvo-amrwbenc-dev libvorbis-dev libxml2-dev  \
  libxslt1-dev perl portaudio19-dev subversion unixodbc-dev  \
  uuid-dev zlib1g-dev devscripts --no-install-recommends 

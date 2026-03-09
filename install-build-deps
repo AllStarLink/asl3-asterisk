@@ -51,6 +51,8 @@ apt -y install  autoconf \
  libssl-dev \
  libswscale-dev \
  libsystemd-dev \
+ libtonezone-dev\
+ libtonezone2.0 \
  libunbound-dev \
  liburiparser-dev \
  libvo-amrwbenc-dev \
