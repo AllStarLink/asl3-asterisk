@@ -1,7 +1,6 @@
 etc/logrotate.d/*
 lib/systemd/system/asterisk.service
 usr/bin/asterisk-config-custom
-usr/bin/asl-dahdi-repair
 usr/lib/${DEB_HOST_MULTIARCH}/libasterisk*
 usr/sbin
 usr/share/asterisk/conf
