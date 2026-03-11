@@ -610,9 +610,15 @@ revert_patch()
 add_asterisk()
 {
     if [[ ! -d "${ASTERISK_DIR}" ]]; then
-	echo "Cloning \"asterisk\", tag==${AST_VER}"
-	git clone https://github.com/asterisk/asterisk.git "${ASTERISK_DIR}"
-	( cd "${ASTERISK_DIR}"; git checkout ${AST_VER} )
+        echo "Cloning \"asterisk\", tag==${AST_VER}"
+
+        git clone \
+            --filter=tree:0 \
+            --no-tags \
+            --single-branch \
+            --branch "${AST_VER}" \
+            https://github.com/asterisk/asterisk.git \
+            "${ASTERISK_DIR}"
     fi
 }
 

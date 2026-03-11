@@ -348,7 +348,7 @@ override_dh_gencontrol:
 	DAHDI_DEP=''; \
 	if grep -Eq '^[[:space:]]*(load|require)[[:space:]]*=[[:space:]]*.*chan_dahdi\.so([[:space:]]*($$|;|#).*)?$$' \
 		configs/asl3/modules.conf 2>/dev/null; then \
-		DAHDI_DEP='dahdi-linux, dahdi-dkms (>= 3.4.0-6)'; \
+		DAHDI_DEP='dahdi-linux (>= 3.4.0-11), dahdi-source (>= 3.4.0-11) | dahdi-dkms (>= 3.4.0-11)'; \
 	fi; \
 	dh_gencontrol -- \
 		-Vasterisk:ABI=$$AST_BUILDOPT_SUM \
@@ -389,7 +389,6 @@ execute_after_dh_auto_install:
 	install -D -m 644 etc/90-asl3.rules debian/tmp/etc/udev/rules.d/90-asl3.rules
 	install -D -m 644 debian/asterisk.logrotate debian/tmp/etc/logrotate.d/asterisk
 	install -D -m 755 contrib/scripts/ast_coredumper debian/tmp/var/lib/asterisk/scripts/ast_coredumper
-	install -D -m 755 debian/scripts/asl-dahdi-repair debian/tmp/usr/bin/asl-dahdi-repair
 
 #execute_after_dh_install-arch:
 #	extra_packs=$$(find $(SUBPACKS_EXTRA_DIRS_MOD) -name '*.so' -printf '%f\n');\
