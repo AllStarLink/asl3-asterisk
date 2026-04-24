@@ -17,6 +17,7 @@ update_asl_configuration()
 {
     # Update "modules.conf" to use non-DAHDI bridging
     perl -0 -pi -e '
+	s{\r\n}{\n}g;
 	s{
 	    (^load[[:blank:]]*=>?[[:blank:]]*app_transfer\.so(?:[[:blank:]][^\n]*)?\n)
 	    ^[[:blank:]]*\n
@@ -73,6 +74,7 @@ update_asl_configuration()
 
     # Update "extensions.conf" to use non-DAHDI bridging
     perl -0 -pi -e '
+	s{\r\n}{\n}g;
 	s{
 	    ^\[pstn-out\]\n
 	    ^exten[[:blank:]]*=>[[:blank:]]*_NXXNXXXXXX,1,playback\(ss-noservice\)\n
