@@ -89,8 +89,10 @@ case "$1" in
 			2>/dev/null
 	done
 
-	# load the modules we care about
-	modprobe -aq snd-pcm-oss
+	# load OSS module when this package ships asl3-oss.conf (OSS-based app_rpt)
+	if [ -f /etc/modules-load.d/asl3-oss.conf ]; then
+		modprobe -aq snd-pcm-oss
+	fi
 
 	# remove customized /etc/systemd/system/asterisk.service
 	test -f /etc/systemd/system/asterisk.service && \
