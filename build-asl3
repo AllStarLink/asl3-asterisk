@@ -123,9 +123,14 @@ shift $((OPTIND-1))
 
 # ---------- ---------- ---------- ---------- ---------- ----------
 
+BASE_DIR="$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
+ASL3_ASTERISK_DIR="${BASE_DIR}/asl3-asterisk"
+ASTERISK_DIR="${BASE_DIR}/asterisk"
+APP_RPT_DIR="${BASE_DIR}/app_rpt"
+
 if [[ -z "${AST_VER}" ]]; then
-    if [[ -x ../asterisk/build_tools/make_version ]]; then
-	pushd ../asterisk	>/dev/null
+    if [[ -x "${ASTERISK_DIR}/build_tools/make_version" ]]; then
+	pushd "${ASTERISK_DIR}"	>/dev/null
 	AST_REPO=$(build_tools/make_version .)
 	popd			>/dev/null
 	if [[ $AST_REPO =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -143,10 +148,10 @@ if [[ -z "${AST_VER}" && -n "${AST_PKG}" ]]; then
 fi
 
 if [[ -z "${RPT_VER}" ]]; then
-    if [[ -f ../app_rpt/apps/app_rpt/app_rpt.h ]]; then
-	MAJ=$(grep VERSION_MAJOR ../app_rpt/apps/app_rpt/app_rpt.h)
-	MIN=$(grep VERSION_MINOR ../app_rpt/apps/app_rpt/app_rpt.h)
-	PAT=$(grep VERSION_PATCH ../app_rpt/apps/app_rpt/app_rpt.h)
+    if [[ -f "${APP_RPT_DIR}/apps/app_rpt/app_rpt.h" ]]; then
+	MAJ=$(grep VERSION_MAJOR "${APP_RPT_DIR}/apps/app_rpt/app_rpt.h")
+	MIN=$(grep VERSION_MINOR "${APP_RPT_DIR}/apps/app_rpt/app_rpt.h")
+	PAT=$(grep VERSION_PATCH "${APP_RPT_DIR}/apps/app_rpt/app_rpt.h")
 	RPT_REPO="${MAJ##* }.${MIN##* }.${PAT##* }"
 	if [[ "${RPT_REPO}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 	    RPT_VER="${RPT_REPO}"
@@ -185,12 +190,6 @@ fi
 EPOCH="2"
 FULL_REL="${REL_VER}.deb$(lsb_release -rs 2> /dev/null)"
 VSTR="${AST_VER}+asl3-${RPT_VER}"
-
-BASE_DIR="$(pwd -P)"
-BASE_DIR="${BASE_DIR%/asl3-asterisk}"
-ASL3_ASTERISK_DIR="${BASE_DIR}/asl3-asterisk"
-ASTERISK_DIR="${BASE_DIR}/asterisk"
-APP_RPT_DIR="${BASE_DIR}/app_rpt"
 
 if [[ -n "${MERGE_DIR}" ]]; then
     REAL_MERGE_DIR=$(realpath -m "${MERGE_DIR}")
