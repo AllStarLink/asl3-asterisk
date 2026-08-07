@@ -66,6 +66,7 @@ Build-Depends:
  libunbound-dev,
  liburiparser-dev,
  libusb-dev,
+ libusb-1.0-0-dev,
  libvo-amrwbenc-dev,
  libvorbis-dev,
  libxml2-dev,

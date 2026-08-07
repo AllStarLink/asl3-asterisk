@@ -64,6 +64,7 @@ apt -y install  autoconf \
  libxml2-dev \
  libxslt1-dev \
  libusb-dev \
+ libusb-1.0-0-dev \
  perl \
  portaudio19-dev \
  subversion \
