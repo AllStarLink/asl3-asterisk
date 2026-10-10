@@ -2,7 +2,7 @@ diff --git a/configs/rpt/extensions.conf b/configs/rpt/extensions.conf
 index d8a259e..e4c79ff 100644
 --- a/configs/rpt/extensions.conf
 +++ b/configs/rpt/extensions.conf
-@@ -164,11 +164,14 @@ exten => _5.,n,Hangup
+@@ -164,11 +164,15 @@ exten => _5.,n,Hangup
  
  [allstar-public]
  exten => s,1,Ringing
@@ -15,6 +15,7 @@ index d8a259e..e4c79ff 100644
  	same => n,GotoIf($["${RESP:0:5}" != "OHYES"]?hangit)
 -	same => n,Set(CALLSIGN=${RESP:5})
 +	same => n,Set(RCALLSIGN=${RESP:5})
++	same => n,ExecIf($["${CALLSIGN}" = ""]?Set(CALLSIGN=${RCALLSIGN}))
 +	same => n,GotoIf($["${RCALLSIGN}" != "${CALLSIGN}"]?hangit)
  	same => n,Set(NODENUM=${CALLERID(num)})
  
