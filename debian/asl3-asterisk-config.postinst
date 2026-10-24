@@ -101,14 +101,9 @@ update_asl_configuration()
 	}gmxe;
     ' /etc/asterisk/extensions.conf
 
-	# Update "extensions.conf" for AppAuth API
-	if $(grep -q authwebphone.pl /etc/asterisk/extensions.conf); then
-		pushd /etc/asterisk > /dev/null
-			patch -t -N --no-backup-if-mismatch -p1 -r - -s \
-				-i /usr/share/doc/asl3-asterisk-config/extensions-appauth.patch \
-				< /dev/null || /usr/bin/true
-		popd > /dev/null
-	fi
+    # Update "extensions.conf" for the AppAuth API (ASL002)
+    /usr/libexec/asl3-asterisk-config/asl3-appauth-update \
+	/etc/asterisk/extensions.conf || true
 }
 
 set -e
