@@ -1,0 +1,377 @@
+#!/usr/bin/perl
+#
+# asl3-appauth-update - migrate the [allstar-public] dialplan from the
+# legacy authwebphone.pl web-phone authentication to the AppAuth API
+# (ASL002).
+#
+# Rather than applying a positional patch, this script locates the
+# relevant dialplan lines by what they *do* and rewrites them in place,
+# keeping the surrounding file (and its formatting) untouched.  It
+# tolerates:
+#
+#   - lines moved anywhere in the file (no offsets / fuzz)
+#   - tabs vs. spaces, extra blanks, CRLF line endings
+#   - "same => n,..." and "exten => s,n,..." styles
+#   - priority labels and trailing comments on the rewritten lines
+#   - renamed variables (RESP, CALLSIGN) and hangup labels (hangit)
+#   - the context being renamed, copied, or living in an #include'd file
+#   - legacy http:// or alternate hosts for authwebphone.pl
+#
+# Commented-out lines are never touched.  Running the script more than
+# once is harmless.  Only modules from perl-base are used.
+#
+# Exit status:
+#   0  file(s) updated, or nothing needed updating
+#   1  at least one occurrence could not be (fully) updated; manual
+#      review needed (the file is still updated as far as was safe)
+#   2  usage or I/O error
+#
+
+use strict;
+use warnings;
+use File::Basename qw(dirname basename);
+use File::Temp qw(tempfile);
+use Getopt::Long qw(GetOptions);
+
+my $PROG    = basename($0);
+my $API_URL = 'https://api.allstarlink.org/v1/appauth/validate';
+
+my %opt = (backup => 1, includes => 1);
+GetOptions(
+    'dry-run|n'  => \$opt{dry_run},
+    'quiet|q'    => \$opt{quiet},
+    'backup!'    => \$opt{backup},
+    'includes!'  => \$opt{includes},
+    'confdir=s'  => \$opt{confdir},
+    'help|h'     => \$opt{help},
+) or usage(2);
+usage(0) if $opt{help};
+
+my @files = @ARGV ? @ARGV : ('/etc/asterisk/extensions.conf');
+my $status = 0;
+my %seen;
+
+for my $file (@files) {
+    my $confdir = $opt{confdir} // dirname($file);
+    process_file($file, $confdir, 0);
+}
+exit $status;
+
+sub usage {
+    my ($rc) = @_;
+    print STDERR <<"EOF";
+Usage: $PROG [options] [extensions.conf ...]
+
+Rewrite legacy authwebphone.pl authentication in the Asterisk dialplan
+to use the AllStarLink AppAuth API.  Defaults to
+/etc/asterisk/extensions.conf.
+
+  -n, --dry-run     show a diff of what would change, write nothing
+  -q, --quiet       only report problems
+      --no-backup   do not keep a <file>.pre-appauth copy
+      --no-includes do not follow #include / #tryinclude
+      --confdir DIR resolve relative includes against DIR
+                    (default: directory of each named file)
+EOF
+    exit $rc;
+}
+
+sub info { print STDERR "$PROG: @_\n" unless $opt{quiet} }
+sub warning { print STDERR "$PROG: WARNING: @_\n"; $status = 1 if $status < 1 }
+sub fatal { print STDERR "$PROG: ERROR: @_\n"; $status = 2 }
+
+#
+# Split a config line into (code, comment).  Asterisk treats ';' as a
+# comment start unless escaped as '\;'.
+#
+sub split_comment {
+    my ($line) = @_;
+    if ($line =~ /^((?:[^;\\]|\\.)*?)(\s*;.*)?$/s) {
+        return ($1, $2 // '');
+    }
+    return ($line, '');
+}
+
+#
+# Parse a dialplan line of the form
+#     <indent>same => <pri>[(<label>)],<app>
+#     <indent>exten => <ext>,<pri>[(<label>)],<app>
+# Returns a hashref, or undef if the line is not an extension line.
+#
+sub parse_ext {
+    my ($code) = @_;
+    $code =~ m{
+        ^(?<ind>[ \t]*)
+        (?<kw> (?i:same) [ \t]*=>?[ \t]*
+             | (?i:exten) [ \t]*=>?[ \t]*[^,]+?[ \t]*,[ \t]*)
+        (?<pri>[^,(]+?)
+        [ \t]*(?<label>\([^)]*\))?
+        [ \t]*,[ \t]*
+        (?<app>.*?)[ \t]*$
+    }x or return undef;
+    my %p = %+;
+    $p{label} //= '';
+    # Only relative priorities ("n", "n+1") can safely grow by a line.
+    $p{relative} = ($p{pri} =~ /^n(?:\+\d+)?$/i) ? 1 : 0;
+    return \%p;
+}
+
+sub ext_line {
+    my ($p, $pri, $label, $app, $comment, $eol) = @_;
+    return "$p->{ind}$p->{kw}$pri$label,$app$comment$eol";
+}
+
+#
+# Find active (not commented) #include / #tryinclude targets.
+#
+sub include_targets {
+    my ($lines, $confdir) = @_;
+    my @out;
+    my $in_block = 0;
+    for my $raw (@$lines) {
+        (my $l = $raw) =~ s/\r?\n\z//;
+        if ($in_block) { $in_block = 0 if $l =~ /--;/; next }
+        if ($l =~ /^\s*;--/ && $l !~ /--;/) { $in_block = 1; next }
+        next unless $l =~ /^\s*#\s*(?:try)?include\s+(?:"([^"]+)"|<([^>]+)>|(\S+))/i;
+        my $t = $1 // $2 // $3;
+        $t = "$confdir/$t" unless $t =~ m{^/};
+        push @out, glob($t =~ /[*?\[]/ ? $t : quotemeta($t));
+    }
+    return grep { -f $_ } @out;
+}
+
+sub process_file {
+    my ($file, $confdir, $depth) = @_;
+
+    my $real = -l $file ? readlink_full($file) : $file;
+    return if $seen{$real}++;
+    if ($depth > 10) {
+        warning("include depth exceeded at $file");
+        return;
+    }
+
+    my $fh;
+    unless (open($fh, '<:raw', $real)) {
+        # Missing included files are fine (#tryinclude); a missing
+        # top-level file is worth mentioning but not fatal for postinst.
+        info("$file: not found, nothing to do") unless $depth;
+        return;
+    }
+    my @lines = <$fh>;
+    close($fh);
+
+    my ($new, $changed) = transform($file, \@lines);
+
+    if ($changed) {
+        if ($opt{dry_run}) {
+            show_diff($file, \@lines, $new);
+        } else {
+            write_file($real, \@lines, $new) and info("$file: updated $changed occurrence(s) for AppAuth");
+        }
+    }
+
+    if ($opt{includes}) {
+        process_file($_, $confdir, $depth + 1)
+            for include_targets(\@lines, $confdir);
+    }
+}
+
+sub readlink_full {
+    my ($f) = @_;
+    my $n = 0;
+    while (-l $f && $n++ < 32) {
+        my $t = readlink($f);
+        $f = $t =~ m{^/} ? $t : dirname($f) . "/$t";
+    }
+    return $f;
+}
+
+#
+# Core rewrite.  Returns (\@new_lines, number_of_occurrences_changed).
+#
+sub transform {
+    my ($file, $lines) = @_;
+
+    # Pre-parse every line once: context, active code, comment, EOL.
+    my (@info, $ctx, $in_block);
+    $ctx = '';
+    for my $i (0 .. $#$lines) {
+        my $raw = $lines->[$i];
+        my ($body, $eol) = $raw =~ /^(.*?)(\r?\n|)\z/s;
+        my %li = (eol => $eol, ctx => $ctx, active => 0);
+        if ($in_block) {
+            $in_block = 0 if $body =~ /--;/;
+        } elsif ($body =~ /^\s*;--/ && $body !~ /--;/) {
+            $in_block = 1;
+        } else {
+            my ($code, $comment) = split_comment($body);
+            if ($code =~ /^\s*\[([^\]]+)\]/) {
+                $ctx = $li{ctx} = $1;
+            } elsif ($code =~ /\S/) {
+                @li{qw(active code comment)} = (1, $code, $comment);
+                $li{ext} = parse_ext($code);
+            }
+        }
+        push @info, \%li;
+    }
+
+    my %replace;    # line index -> [replacement lines]
+    my $changed = 0;
+
+    for my $i (0 .. $#info) {
+        my $li = $info[$i];
+        next unless $li->{active} && $li->{code} =~ /authwebphone\.pl/i;
+
+        my $where = "$file:" . ($i + 1) . " [$li->{ctx}]";
+        my $p = $li->{ext};
+        my ($rv, $src);
+        if ($p && $p->{app} =~ m{
+                ^Set\(\s*(\w+)\s*=\s*
+                \$\{CURL\(\s*[^?\s]*authwebphone\.pl\?\s*
+                \$\{\s*([^{}]+?)\s*\}
+                \s*\)\}\s*\)$
+            }xi) {
+            ($rv, $src) = ($1, $2);
+        } else {
+            warning("$where: authwebphone.pl line not in a recognized form; update it by hand");
+            next;
+        }
+        unless ($p->{relative}) {
+            warning("$where: uses numbered priority '$p->{pri}'; inserting lines would collide, update by hand");
+            next;
+        }
+
+        # 1) The CURL line becomes TOKEN / CALLSIGN extraction + new URL.
+        my ($c, $e) = ($li->{comment}, $li->{eol});
+        $replace{$i} = [
+            ext_line($p, $p->{pri}, $p->{label}, "Set(TOKEN=\${CUT($src,/,1)})", $c, $e),
+            ext_line($p, 'n', '', "Set(CALLSIGN=\${CUT($src,/,2)})", '', $e),
+            ext_line($p, 'n', '', "Set($rv=\${CURL($API_URL?t=\${TOKEN}&u=\${CALLSIGN})})", '', $e),
+        ];
+        $changed++;
+
+        # 2) Find where the callsign is taken from the response, and the
+        #    label the response checks jump to on failure.
+        my ($hang, $cs);
+        for my $j ($i + 1 .. $#info) {
+            my $lj = $info[$j];
+            last if $lj->{ctx} ne $li->{ctx};
+            next unless $lj->{active} && $lj->{ext};
+            my $app = $lj->{ext}{app};
+            if (!defined $hang
+                && $app =~ /^GotoIf\(.*\$\{\s*\Q$rv\E\s*:.*\?\s*([^:)]+?)\s*(?::[^)]*)?\)$/i) {
+                $hang = $1;
+            }
+            if ($app =~ /^Set\(\s*([^=]+?)\s*=\s*\$\{\s*\Q$rv\E\s*:\s*5\s*\}\s*\)$/i) {
+                $cs = { idx => $j, lhs => $1 };
+                last;
+            }
+        }
+        if (!defined $hang) {
+            # Fall back to a conventional label in the same context.
+            for my $lj (@info) {
+                next unless $lj->{ctx} eq $li->{ctx} && $lj->{ext};
+                if ($lj->{ext}{label} =~ /^\(\s*(hangit)\s*\)$/i) { $hang = $1; last }
+            }
+        }
+
+        unless ($cs) {
+            warning("$where: URL updated, but no Set(...=\${$rv:5}) found to add the callsign check; review by hand");
+            next;
+        }
+        unless (defined $hang) {
+            warning("$where: URL updated, but no failure label found for the callsign check; review by hand");
+            next;
+        }
+        my $q = $info[$cs->{idx}];
+        my $qp = $q->{ext};
+        unless ($qp->{relative}) {
+            warning("$where: URL updated, but callsign line uses numbered priority; add the callsign check by hand");
+            next;
+        }
+
+        # 3) Verify the callsign the API returns matches the one sent.
+        my $qe = $q->{eol};
+        my @r = (
+            ext_line($qp, $qp->{pri}, $qp->{label}, "Set(RCALLSIGN=\${$rv:5})", $q->{comment}, $qe),
+            ext_line($qp, 'n', '', "ExecIf(\$[\"\${CALLSIGN}\" = \"\"]?Set(CALLSIGN=\${RCALLSIGN}))", '', $qe),
+            ext_line($qp, 'n', '', "GotoIf(\$[\"\${RCALLSIGN}\" != \"\${CALLSIGN}\"]?$hang)", '', $qe),
+        );
+        # Older dialplans assign the callsign straight to something else
+        # (e.g. CALLERID(name)); keep doing that after the check.
+        push @r, ext_line($qp, 'n', '', "Set($cs->{lhs}=\${RCALLSIGN})", '', $qe)
+            unless $cs->{lhs} eq 'CALLSIGN';
+        $replace{$cs->{idx}} = \@r;
+    }
+
+    return ($lines, 0) unless $changed;
+
+    my @new = map { $replace{$_} ? @{ $replace{$_} } : $lines->[$_] } 0 .. $#$lines;
+
+    # Sanity check: every line we did not intend to touch is unchanged
+    # and in the same order.
+    my @kept_old = map { $lines->[$_] } grep { !$replace{$_} } 0 .. $#$lines;
+    my @kept_new;
+    {
+        my $k = 0;
+        for my $i (0 .. $#$lines) {
+            if ($replace{$i}) { $k += @{ $replace{$i} } }
+            else { push @kept_new, $new[$k++] }
+        }
+    }
+    if (join('', @kept_old) ne join('', @kept_new)) {
+        fatal("$file: internal consistency check failed; not modifying");
+        return ($lines, 0);
+    }
+
+    return (\@new, $changed);
+}
+
+sub show_diff {
+    my ($file, $old, $new) = @_;
+    my ($ofh, $oname) = tempfile(UNLINK => 1);
+    my ($nfh, $nname) = tempfile(UNLINK => 1);
+    binmode($_, ':raw') for $ofh, $nfh;
+    print $ofh @$old; close($ofh);
+    print $nfh @$new; close($nfh);
+    system('diff', '-u', '--label', "$file", '--label', "$file (AppAuth)", $oname, $nname);
+}
+
+sub write_lines {
+    my ($path, $lines) = @_;
+    open(my $fh, '>:raw', $path) or return 0;
+    print $fh @$lines or return 0;
+    return close($fh);
+}
+
+sub write_file {
+    my ($file, $old, $new) = @_;
+    my @st = stat($file);
+    my $dir = dirname($file);
+
+    if ($opt{backup}) {
+        my $bak = "$file.pre-appauth";
+        $bak .= '.' . time() if -e $bak;
+        unless (write_lines($bak, $old)) {
+            fatal("$file: cannot create backup $bak: $!; not modifying");
+            return 0;
+        }
+        chmod($st[2] & 07777, $bak);
+        chown($st[4], $st[5], $bak);
+    }
+
+    my (undef, $tmp) = eval { tempfile('.appauth-XXXXXX', DIR => $dir, OPEN => 0) };
+    unless ($tmp && write_lines($tmp, $new)) {
+        unlink($tmp) if $tmp;
+        fatal("$file: cannot write temporary file in $dir: " . ($@ || $!));
+        return 0;
+    }
+    chmod($st[2] & 07777, $tmp);
+    chown($st[4], $st[5], $tmp);
+    unless (rename($tmp, $file)) {
+        unlink($tmp);
+        fatal("$file: cannot replace: $!");
+        return 0;
+    }
+    return 1;
+}
