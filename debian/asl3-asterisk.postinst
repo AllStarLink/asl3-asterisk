@@ -76,11 +76,18 @@ case "$1" in
 			 sed -nr 's/(.*)\tasterisk-config-custom|(asterisk-config)(\t.*)?/\1\2/p'`
 
 	# find conffiles under /etc/asterisk belonging to asterisk-config
-	# and chown them to user asterisk.
+	# Set the default owner, with an exception required by ast_coredumper.
 	dpkg-query -W -f='${Conffiles}\n' $ASTERISK_CONFIG 2>/dev/null | \
 	  sed -nr -e 's; (/etc/asterisk/.*) [0-9a-f]*;\1;p' | \
 	while read conffile; do
-		chown asterisk: "$conffile" 2>/dev/null
+		case "$conffile" in
+		    /etc/asterisk/ast_debug_tools.conf)
+			chown -h root:root "$conffile" 2>/dev/null
+		    ;;
+		    *)
+			chown asterisk: "$conffile" 2>/dev/null
+		    ;;
+		esac
 	done
 
 	# handle them in the end with a glob since it's way faster
