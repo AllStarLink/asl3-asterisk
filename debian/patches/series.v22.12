@@ -29,4 +29,5 @@ enable_custom_sounddir.patch
 #chan_iax2_unknown_format.patch
 #file_c_search_custom_dir_no_warnings.patch
 #file_c_search_custom_sounds.patch
+chan_iax2_support_ipv6_addresses.patch
 chan_iax2_dual_stack_support.patch
