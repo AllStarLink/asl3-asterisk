@@ -1,0 +1,69 @@
+diff --git a/channels/chan_iax2.c b/channels/chan_iax2.c
+index 1c4929920bb..1500ef44cdc 100644
+--- a/channels/chan_iax2.c
++++ b/channels/chan_iax2.c
+@@ -9019,36 +9019,36 @@ static int iax2_append_register(const char *hostname, const char *username,
+ static int iax2_register(const char *value, int lineno)
+ {
+ 	char copy[256];
+-	char *username, *hostname, *secret;
+-	char *porta;
+-	char *stringp=NULL;
++	char *userpart, *hostpart;
++	char *username, *secret;
++	char *host, *port;
++	char *stringp = NULL;
+ 
+ 	if (!value)
+ 		return -1;
+ 
+ 	ast_copy_string(copy, value, sizeof(copy));
+ 	stringp = copy;
+-	username = strsep(&stringp, "@");
+-	hostname = strsep(&stringp, "@");
++	userpart = strsep(&stringp, "@");
++	hostpart = strsep(&stringp, "@");
+ 
+-	if (!hostname) {
++	if (!hostpart) {
+ 		ast_log(LOG_WARNING, "Format for registration is user[:secret]@host[:port] at line %d\n", lineno);
+ 		return -1;
+ 	}
+ 
+-	stringp = username;
++	stringp = userpart;
+ 	username = strsep(&stringp, ":");
+ 	secret = strsep(&stringp, ":");
+-	stringp = hostname;
+-	hostname = strsep(&stringp, ":");
+-	porta = strsep(&stringp, ":");
+ 
+-	if (porta && !atoi(porta)) {
+-		ast_log(LOG_WARNING, "%s is not a valid port number at line %d\n", porta, lineno);
++	ast_sockaddr_split_hostport(hostpart, &host, &port, 0);
++
++	if (port && !atoi(port)) {
++		ast_log(LOG_WARNING, "%s is not a valid port number at line %d\n", port, lineno);
+ 		return -1;
+ 	}
+ 
+-	return iax2_append_register(hostname, username, secret, porta);
++	return iax2_append_register(host, username, secret, port);
+ }
+ 
+ 
+diff --git a/configs/samples/iax.conf.sample b/configs/samples/iax.conf.sample
+index 68d8aef1635..67a4a8e68cd 100644
+--- a/configs/samples/iax.conf.sample
++++ b/configs/samples/iax.conf.sample
+@@ -312,6 +312,10 @@ encryption=yes
+ ;
+ ;register => marko:[torkey]@tormenta.linux-support.net
+ ;
++; Register sean at an IPv6 enabled host
++;
++;register => sean:secure@[2001:0db8::42]:4570
++;
+ ; Through the use of the res_stun_monitor module, Asterisk has the ability to detect when the
+ ; perceived external network address has changed.  When the stun_monitor is installed and
+ ; configured, chan_iax will renew all outbound registrations when the monitor detects any sort
